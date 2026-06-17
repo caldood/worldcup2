@@ -37,19 +37,25 @@ function GoalkeeperSprite({ className }: { className?: string }) {
 }
 
 // Clean white-and-navy USA kit built from rounded rects rather than sharp polygons, so it reads
-// as a tidy player rather than a jagged paper cutout: planted leg behind, kicking leg swung
-// forward toward the ball, arms bent out for balance.
-function KickerSprite({ className }: { className?: string }) {
+// as a tidy player rather than a jagged paper cutout. At rest both legs stand straight and apart
+// (no crossing); on the shot the kicking leg swings forward into the ball.
+function KickerSprite({ className, kicking }: { className?: string; kicking?: boolean }) {
   return (
     <svg viewBox="0 0 100 130" className={className} aria-hidden="true">
-      {/* planted leg, slight backward lean for balance */}
-      <g transform="rotate(-8 38 70)">
+      {/* planted leg, straight at rest, leans back slightly to brace as the other leg swings */}
+      <g
+        transform={`rotate(${kicking ? -14 : -2} 38 70)`}
+        style={{ transition: 'transform 0.18s ease-out' }}
+      >
         <rect x="31" y="68" width="14" height="46" rx="6" fill="#f8fafc" stroke="#1d4ed8" strokeWidth="1.5" />
         <rect x="27" y="108" width="21" height="10" rx="3" fill="#1e293b" />
       </g>
 
-      {/* kicking leg, swung forward toward the ball */}
-      <g transform="rotate(55 58 70)">
+      {/* kicking leg, straight at rest, swings forward into the ball on the shot */}
+      <g
+        transform={`rotate(${kicking ? 62 : 2} 58 70)`}
+        style={{ transition: 'transform 0.18s ease-out' }}
+      >
         <rect x="51" y="68" width="14" height="46" rx="6" fill="#f8fafc" stroke="#1d4ed8" strokeWidth="1.5" />
         <rect x="47" y="108" width="21" height="10" rx="3" fill="#1e293b" />
       </g>
@@ -187,7 +193,7 @@ function scatterFlags(
 // Ball sits ahead (toward the goal, smaller y) and off to one side of where the kicker stands,
 // like a real penalty spot rather than glued to his feet. KICKER_POS.y is kept well clear of the
 // field container's bottom edge so the (tall) kicker sprite never gets clipped.
-const BALL_START = { x: 60, y: 70 };
+const BALL_START = { x: 54, y: 75 };
 const KICKER_POS = { x: 45, y: 78 };
 // Centered in the (now much shorter) net so the goal reads as far away rather than filling the frame.
 const KEEPER_POS = { x: 50, y: 25 };
@@ -363,7 +369,7 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
         className={`absolute -translate-x-1/2 -translate-y-1/2 ${phase === 'flying' ? 'animate-kick-lunge' : ''}`}
         style={{ left: `${KICKER_POS.x}%`, top: `${KICKER_POS.y}%` }}
       >
-        <KickerSprite className="h-20 w-16 drop-shadow-md" />
+        <KickerSprite className="h-20 w-16 drop-shadow-md" kicking={flying} />
       </div>
 
       {/* ground shadow, tracks the ball and shrinks as it gets airborne */}
