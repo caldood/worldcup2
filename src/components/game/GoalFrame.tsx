@@ -192,18 +192,19 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
       <div className="absolute rounded-sm bg-white shadow-[0_0_4px_rgba(0,0,0,0.3)]" style={{ left: '6%', right: '6%', top: 0, height: '4%' }} />
 
       {/* penalty box, drawn in forced perspective (narrow near the goal, wide toward the kicker) to
-          sell the open stretch of pitch between the goal line and the spot */}
+          sell the open stretch of pitch between the goal line and the spot. The viewBox matches the
+          container's 16:9 aspect ratio (instead of a stretched 100x100 square) so circles/curves/strokes
+          render true instead of squashed into ellipses. */}
       <svg
         className="pointer-events-none absolute inset-0"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
+        viewBox="0 0 100 56.25"
         aria-hidden="true"
       >
-        <polyline points="30,50 16,84" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="0.6" />
-        <polyline points="70,50 84,84" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="0.6" />
-        <line x1="30" y1="50" x2="70" y2="50" stroke="rgba(255,255,255,0.55)" strokeWidth="0.6" />
-        <path d="M 40,50 Q 50,66 60,50" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="0.6" />
-        <circle cx="50" cy="70" r="1.4" fill="rgba(255,255,255,0.7)" />
+        <polyline points="30,28.1 16,47.3" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="0.5" />
+        <polyline points="70,28.1 84,47.3" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="0.5" />
+        <line x1="30" y1="28.1" x2="70" y2="28.1" stroke="rgba(255,255,255,0.55)" strokeWidth="0.5" />
+        <path d="M 40,28.1 Q 50,37.1 60,28.1" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="0.5" />
+        <circle cx="50" cy="39.4" r="1" fill="rgba(255,255,255,0.7)" />
       </svg>
 
       {isGoalImpact && (
