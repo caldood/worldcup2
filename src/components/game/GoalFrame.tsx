@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import type { ShotOutcome } from '../../types';
 
 interface GoalFrameProps {
@@ -77,6 +77,59 @@ function KickerSprite({ className }: { className?: string }) {
 // Small spread of national flags scattered across the crowd strip above the goal.
 const CROWD_FLAGS = ['🇺🇸', '🇧🇷', '🇦🇷', '🇩🇪', '🇫🇷', '🇯🇵', '🇪🇸', '🇮🇹', '🇲🇽', '🇳🇬', '🇰🇷', '🇬🇧', '🇵🇹', '🇳🇱'];
 
+// Skin/hair/shirt color triples cycled across the crowd so neighbouring fans don't look cloned.
+const CROWD_PALETTE: { skin: string; hair: string; shirt: string }[] = [
+  { skin: '#e8b08a', hair: '#2d1b0e', shirt: '#ef4444' },
+  { skin: '#c98a5e', hair: '#1c1410', shirt: '#3b82f6' },
+  { skin: '#f3c9a3', hair: '#5c3a21', shirt: '#facc15' },
+  { skin: '#8d5a3c', hair: '#0f0f0f', shirt: '#22c55e' },
+  { skin: '#e8b08a', hair: '#7c4a25', shirt: '#a855f7' },
+  { skin: '#c98a5e', hair: '#2d1b0e', shirt: '#f8fafc' },
+  { skin: '#f3c9a3', hair: '#1c1410', shirt: '#fb923c' },
+  { skin: '#8d5a3c', hair: '#5c3a21', shirt: '#06b6d4' },
+];
+
+// Deterministically lays out a grid of tiny "person" shapes (head + shoulders) standing in for a
+// packed crowd, sized to a given SVG viewBox. No randomness so renders are stable across re-paints.
+function crowdPeople(viewBoxWidth: number, viewBoxHeight: number, rows: number, cols: number) {
+  const people: ReactElement[] = [];
+  const rowH = viewBoxHeight / rows;
+  const colW = viewBoxWidth / cols;
+  const headR = Math.min(rowH, colW) * 0.32;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const i = r * cols + c;
+      const palette = CROWD_PALETTE[i % CROWD_PALETTE.length];
+      // Stagger alternate rows and jitter slightly by index so the grid doesn't look mechanically regular.
+      const jitterX = ((i % 5) - 2) * (colW * 0.08);
+      const rowOffset = r % 2 === 1 ? colW * 0.5 : 0;
+      const cx = colW * (c + 0.5) + rowOffset + jitterX;
+      if (cx > viewBoxWidth + colW || cx < -colW) continue;
+      const cy = rowH * (r + 0.62);
+      const shoulderW = headR * 2.3;
+      const shoulderH = rowH * 0.46;
+      people.push(
+        <g key={`${r}-${c}`}>
+          <rect
+            x={cx - shoulderW / 2}
+            y={cy - shoulderH * 0.15}
+            width={shoulderW}
+            height={shoulderH}
+            rx={shoulderH * 0.35}
+            fill={palette.shirt}
+          />
+          <circle cx={cx} cy={cy - headR * 1.05} r={headR} fill={palette.skin} />
+          <path
+            d={`M ${cx - headR} ${cy - headR * 1.05} a ${headR} ${headR} 0 0 1 ${headR * 2} 0 z`}
+            fill={palette.hair}
+          />
+        </g>,
+      );
+    }
+  }
+  return people;
+}
+
 const BALL_START = { x: 50, y: 97 };
 const KICKER_POS = { x: 50, y: 95 };
 // Centered in the (now much shorter) net so the goal reads as far away rather than filling the frame.
@@ -148,14 +201,9 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
           Nothing in the scene below is touched or repositioned. */}
       <div className="relative aspect-[16/4] w-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900" />
-        <div
-          className="absolute inset-0 opacity-60"
-          style={{
-            backgroundImage:
-              'repeating-conic-gradient(from 0deg, #f87171 0deg 90deg, #fbbf24 90deg 180deg, #60a5fa 180deg 270deg, #34d399 270deg 360deg)',
-            backgroundSize: '6px 6px',
-          }}
-        />
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 25" preserveAspectRatio="none" aria-hidden="true">
+          {crowdPeople(100, 25, 6, 17)}
+        </svg>
         <div className="pointer-events-none absolute top-3 left-[10%] h-12 w-12 rounded-full bg-amber-100/40 blur-xl" />
         <div className="pointer-events-none absolute top-3 right-[10%] h-12 w-12 rounded-full bg-amber-100/40 blur-xl" />
         <div className="absolute inset-x-0 bottom-2 flex items-center justify-around px-1 text-xs leading-none drop-shadow-sm">
@@ -178,14 +226,9 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
           and a scatter of national flags waving above them */}
       <div className="absolute inset-x-0 top-0 h-[11%] overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900 to-slate-800" />
-        <div
-          className="absolute inset-0 opacity-60"
-          style={{
-            backgroundImage:
-              'repeating-conic-gradient(from 0deg, #f87171 0deg 90deg, #fbbf24 90deg 180deg, #60a5fa 180deg 270deg, #34d399 270deg 360deg)',
-            backgroundSize: '5px 5px',
-          }}
-        />
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 6.1875" preserveAspectRatio="none" aria-hidden="true">
+          {crowdPeople(100, 6.1875, 3, 19)}
+        </svg>
         <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-black/60" />
         <div className="absolute inset-x-0 bottom-0 flex items-center justify-around px-1 text-[10px] leading-none drop-shadow-sm">
           {CROWD_FLAGS.map((flag, i) => (
