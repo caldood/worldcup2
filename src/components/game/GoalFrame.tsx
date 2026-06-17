@@ -4,8 +4,37 @@ import type { ShotOutcome } from '../../types';
 interface GoalFrameProps {
   outcome: ShotOutcome | null;
   ballEmoji: string;
-  keeperEmoji?: string;
   kickerEmoji?: string;
+}
+
+// Drawn from flat polygons/shapes rather than an emoji so the keeper reads as a real
+// goalkeeper: yellow/black kit, gloves, and a wide ready-to-block stance facing the camera.
+function GoalkeeperSprite({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 100 130" className={className} aria-hidden="true">
+      {/* legs, wide ready stance */}
+      <polygon points="46,70 40,128 30,128 38,70" fill="#1e293b" />
+      <polygon points="54,70 60,128 70,128 62,70" fill="#1e293b" />
+      {/* boots */}
+      <polygon points="26,122 40,122 40,130 24,130" fill="#0f172a" />
+      <polygon points="60,122 74,122 76,130 60,130" fill="#0f172a" />
+      {/* shorts */}
+      <rect x="36" y="64" width="28" height="18" rx="3" fill="#0f172a" />
+      {/* jersey */}
+      <polygon points="30,26 70,26 66,68 34,68" fill="#facc15" stroke="#854d0e" strokeWidth="2" />
+      <rect x="46" y="26" width="8" height="42" fill="#854d0e" opacity="0.5" />
+      {/* arms raised wide, ready to block */}
+      <line x1="32" y1="32" x2="8" y2="6" stroke="#facc15" strokeWidth="13" strokeLinecap="round" />
+      <line x1="68" y1="32" x2="92" y2="6" stroke="#facc15" strokeWidth="13" strokeLinecap="round" />
+      {/* gloves */}
+      <circle cx="7" cy="5" r="9" fill="#f8fafc" stroke="#854d0e" strokeWidth="2" />
+      <circle cx="93" cy="5" r="9" fill="#f8fafc" stroke="#854d0e" strokeWidth="2" />
+      {/* neck + head */}
+      <rect x="44" y="20" width="12" height="8" fill="#d8a675" />
+      <circle cx="50" cy="14" r="13" fill="#d8a675" stroke="#7c4a25" strokeWidth="1.5" />
+      <path d="M37 9 a13 13 0 0 1 26 0 z" fill="#2d1b0e" />
+    </svg>
+  );
 }
 
 const BALL_START = { x: 50, y: 97 };
@@ -38,7 +67,7 @@ function keeperDive(outcome: ShotOutcome): { x: number; rotate: number; jump: bo
 
 type Phase = 'idle' | 'flying' | 'impact';
 
-export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🙅', kickerEmoji = '🏃' }: GoalFrameProps) {
+export function GoalFrame({ outcome, ballEmoji, kickerEmoji = '🏃' }: GoalFrameProps) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [trackedOutcome, setTrackedOutcome] = useState(outcome);
 
@@ -117,7 +146,7 @@ export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🙅', kickerEmoj
       )}
 
       <div
-        className="absolute text-7xl drop-shadow-[0_4px_6px_rgba(0,0,0,0.45)]"
+        className="absolute"
         style={{
           left: `${KEEPER_POS.x}%`,
           top: `${KEEPER_POS.y}%`,
@@ -128,7 +157,7 @@ export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🙅', kickerEmoj
           transitionDelay: flying ? '70ms' : '0ms',
         }}
       >
-        {keeperEmoji}
+        <GoalkeeperSprite className="h-[72px] w-14 drop-shadow-[0_4px_6px_rgba(0,0,0,0.45)]" />
       </div>
 
       <div
