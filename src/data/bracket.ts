@@ -23,7 +23,7 @@ export const BRACKET: BracketRound[] = [
     name: 'Quarterfinal',
     opponent: {
       id: 'germany',
-      name: 'Germany Bundesbank XI',
+      name: 'Germany Trade Surplus XI',
       emoji: '🇩🇪',
       color: '#dd0000',
       requiredGoals: 3,
@@ -36,7 +36,7 @@ export const BRACKET: BracketRound[] = [
     name: 'Semifinal',
     opponent: {
       id: 'france',
-      name: 'France Baguette Bears',
+      name: 'France Striking United',
       emoji: '🇫🇷',
       color: '#0055a4',
       requiredGoals: 3,
