@@ -130,6 +130,25 @@ function crowdPeople(viewBoxWidth: number, viewBoxHeight: number, rows: number, 
   return people;
 }
 
+// Deterministic pseudo-random in [0, 1) from a numeric seed, so scattered flag positions stay
+// put across re-renders (the frame re-renders on every shot phase change) instead of jumping around.
+function pseudoRandom(seed: number): number {
+  const x = Math.sin(seed * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+// Scatters a moderate, non-repeating spread of flags across a crowd band: x anywhere across the
+// width, y biased toward the upper portion (`topRange`) so flags wave above the fans' heads.
+function scatterFlags(count: number, seed: number, topRange: [number, number]) {
+  const [topMin, topMax] = topRange;
+  return Array.from({ length: count }, (_, i) => {
+    const flag = CROWD_FLAGS[(i * 5 + seed) % CROWD_FLAGS.length];
+    const left = 3 + pseudoRandom(seed + i * 7.31) * 94;
+    const top = topMin + pseudoRandom(seed + i * 13.7 + 1) * (topMax - topMin);
+    return { flag, left, top, key: `${seed}-${i}` };
+  });
+}
+
 const BALL_START = { x: 50, y: 97 };
 const KICKER_POS = { x: 50, y: 95 };
 // Centered in the (now much shorter) net so the goal reads as far away rather than filling the frame.
@@ -206,9 +225,13 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
         </svg>
         <div className="pointer-events-none absolute top-3 left-[10%] h-12 w-12 rounded-full bg-amber-100/40 blur-xl" />
         <div className="pointer-events-none absolute top-3 right-[10%] h-12 w-12 rounded-full bg-amber-100/40 blur-xl" />
-        <div className="absolute inset-x-0 bottom-2 flex items-center justify-around px-1 text-xs leading-none drop-shadow-sm">
-          {CROWD_FLAGS.map((flag, i) => (
-            <span key={flag} style={{ transform: `translateY(${(i % 3) - 1}px)` }}>
+        <div className="absolute inset-0">
+          {scatterFlags(10, 1, [6, 58]).map(({ flag, left, top, key }) => (
+            <span
+              key={key}
+              className="absolute -translate-x-1/2 -translate-y-1/2 text-2xl leading-none drop-shadow-sm"
+              style={{ left: `${left}%`, top: `${top}%` }}
+            >
               {flag}
             </span>
           ))}
@@ -230,9 +253,13 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
           {crowdPeople(100, 6.1875, 3, 19)}
         </svg>
         <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-black/60" />
-        <div className="absolute inset-x-0 bottom-0 flex items-center justify-around px-1 text-[10px] leading-none drop-shadow-sm">
-          {CROWD_FLAGS.map((flag, i) => (
-            <span key={flag} style={{ transform: `translateY(${(i % 3) - 1}px)` }}>
+        <div className="absolute inset-0">
+          {scatterFlags(6, 31, [10, 60]).map(({ flag, left, top, key }) => (
+            <span
+              key={key}
+              className="absolute -translate-x-1/2 -translate-y-1/2 text-sm leading-none drop-shadow-sm"
+              style={{ left: `${left}%`, top: `${top}%` }}
+            >
               {flag}
             </span>
           ))}
