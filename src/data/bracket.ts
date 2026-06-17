@@ -2,17 +2,17 @@ import type { BracketRound } from '../types';
 
 export const SHOTS_PER_MATCH = 5;
 
-// Fictional clubs only — no real teams, flags, or trademarks. Each opponent riffs on a
-// top footballing nation's economic stereotype rather than its actual team or flag.
+// Real top footballing nations, each paired with a wink at its real-world economic
+// reputation, with their actual flags front and center — this is the World Cup, after all.
 export const BRACKET: BracketRound[] = [
   {
     id: 'round16',
     name: 'Round of 16',
     opponent: {
-      id: 'pampas',
-      name: 'Pampas Peso Printers',
-      emoji: '💵',
-      color: '#5dade2',
+      id: 'argentina',
+      name: 'Argentina Peso Printers',
+      emoji: '🇦🇷',
+      color: '#75aadb',
       requiredGoals: 2,
       speedMultiplier: 1,
     },
@@ -22,10 +22,10 @@ export const BRACKET: BracketRound[] = [
     id: 'quarter',
     name: 'Quarterfinal',
     opponent: {
-      id: 'bundesbank',
-      name: 'Bundesbank Austerity XI',
-      emoji: '🏦',
-      color: '#94a3b8',
+      id: 'germany',
+      name: 'Germany Bundesbank XI',
+      emoji: '🇩🇪',
+      color: '#dd0000',
       requiredGoals: 3,
       speedMultiplier: 1.18,
     },
@@ -35,10 +35,10 @@ export const BRACKET: BracketRound[] = [
     id: 'semi',
     name: 'Semifinal',
     opponent: {
-      id: 'baguette',
-      name: 'Banque de Baguette Bears',
-      emoji: '🥖',
-      color: '#38bdf8',
+      id: 'france',
+      name: 'France Baguette Bears',
+      emoji: '🇫🇷',
+      color: '#0055a4',
       requiredGoals: 3,
       speedMultiplier: 1.35,
     },
@@ -48,9 +48,9 @@ export const BRACKET: BracketRound[] = [
     id: 'final',
     name: 'Final',
     opponent: {
-      id: 'samba',
-      name: 'Rio Real Bull Run',
-      emoji: '🐂',
+      id: 'brazil',
+      name: 'Brazil Bull Run',
+      emoji: '🇧🇷',
       color: '#facc15',
       requiredGoals: 4,
       speedMultiplier: 1.55,
