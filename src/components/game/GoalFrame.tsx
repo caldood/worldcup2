@@ -9,7 +9,9 @@ interface GoalFrameProps {
 }
 
 const BALL_START = { x: 50, y: 97 };
-const KICKER_POS = { x: 50, y: 105 };
+const KICKER_POS = { x: 50, y: 95 };
+// Standing on the goal line, just inside the net mouth, blocking the goal.
+const KEEPER_POS = { x: 50, y: 76 };
 // The pitch/turf strip starts here; net targets live above it, between this and the crossbar.
 const GRASS_TOP = 84;
 
@@ -31,12 +33,12 @@ function keeperDive(outcome: ShotOutcome): { x: number; rotate: number; jump: bo
   if (result === 'topCorner') return { x: (accuracy - 50) * 1.1, rotate: 0, jump: true };
   if (result === 'miss' && (accuracy <= 20 || accuracy >= 80)) return { x: 0, rotate: 0, jump: false };
   const dir = accuracy < 50 ? -1 : 1;
-  return { x: dir * 78, rotate: dir * 80, jump: false };
+  return { x: dir * 85, rotate: dir * 80, jump: false };
 }
 
 type Phase = 'idle' | 'flying' | 'impact';
 
-export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🧤', kickerEmoji = '🏃' }: GoalFrameProps) {
+export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🤾', kickerEmoji = '🏃' }: GoalFrameProps) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [trackedOutcome, setTrackedOutcome] = useState(outcome);
 
@@ -115,11 +117,13 @@ export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🧤', kickerEmoj
       )}
 
       <div
-        className="absolute bottom-2 left-1/2 text-3xl drop-shadow-md ease-out"
+        className="absolute text-7xl drop-shadow-[0_4px_6px_rgba(0,0,0,0.45)]"
         style={{
+          left: `${KEEPER_POS.x}%`,
+          top: `${KEEPER_POS.y}%`,
           transform: dive
-            ? `translateX(calc(-50% + ${flying ? dive.x : 0}px)) translateY(${flying && dive.jump ? -18 : 0}px) rotate(${flying ? dive.rotate : 0}deg)`
-            : 'translateX(-50%)',
+            ? `translate(-50%, -50%) translateX(${flying ? dive.x : 0}px) translateY(${flying && dive.jump ? -26 : 0}px) rotate(${flying ? dive.rotate : 0}deg)`
+            : 'translate(-50%, -50%)',
           transition: 'transform 0.42s cubic-bezier(.33,.9,.4,1)',
           transitionDelay: flying ? '70ms' : '0ms',
         }}
@@ -128,7 +132,7 @@ export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🧤', kickerEmoj
       </div>
 
       <div
-        className={`absolute -translate-x-1/2 -translate-y-1/2 text-4xl drop-shadow-md ${phase === 'flying' ? 'animate-kick-lunge' : ''}`}
+        className={`absolute -translate-x-1/2 -translate-y-1/2 text-5xl drop-shadow-md ${phase === 'flying' ? 'animate-kick-lunge' : ''}`}
         style={{ left: `${KICKER_POS.x}%`, top: `${KICKER_POS.y}%` }}
       >
         {kickerEmoji}

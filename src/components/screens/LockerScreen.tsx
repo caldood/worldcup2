@@ -19,6 +19,13 @@ interface LockerScreenProps {
 export function LockerScreen({ onBack }: LockerScreenProps) {
   const { state, dispatch } = useGame();
 
+  const handleResetGame = () => {
+    if (window.confirm('Reset your portfolio, streak, bracket progress, and unlocked cosmetics? This cannot be undone.')) {
+      dispatch({ type: 'RESET_GAME' });
+      onBack();
+    }
+  };
+
   return (
     <div className="flex h-full flex-col bg-gradient-to-b from-emerald-900 to-emerald-950">
       <div className="flex items-center gap-3 p-4">
@@ -55,9 +62,12 @@ export function LockerScreen({ onBack }: LockerScreenProps) {
         ))}
       </div>
 
-      <div className="border-t border-white/10 bg-black/20 p-3">
+      <div className="space-y-2 border-t border-white/10 bg-black/20 p-3">
         <Button variant="secondary" className="w-full text-sm" onClick={() => dispatch({ type: 'TOGGLE_SOUND' })}>
           {state.soundEnabled ? '🔊 Sound On' : '🔇 Sound Off'}
+        </Button>
+        <Button variant="ghost" className="w-full text-sm text-rose-300" onClick={handleResetGame}>
+          ↺ Reset Progress
         </Button>
       </div>
     </div>
