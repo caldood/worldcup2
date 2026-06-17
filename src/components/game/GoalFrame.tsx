@@ -74,20 +74,25 @@ function KickerSprite({ className }: { className?: string }) {
 
 const BALL_START = { x: 50, y: 97 };
 const KICKER_POS = { x: 50, y: 95 };
-// Up near the crossbar so the keeper's sprite doesn't overlap the kicker below.
-const KEEPER_POS = { x: 50, y: 60 };
-// The pitch/turf strip starts here; net targets live above it, between this and the crossbar.
+// Centered in the (now much shorter) net so the goal reads as far away rather than filling the frame.
+const KEEPER_POS = { x: 50, y: 25 };
+// Goal line: bottom edge of the posts/net. Keeping this well above the foreground turf (instead of
+// stretching the net almost to the kicker's feet) opens up a real stretch of open pitch in between,
+// which is where the penalty-box markings live, so the shot has somewhere to travel.
+const GOAL_LINE = 46;
+// The close-up foreground turf strip starts here; the open pitch between GOAL_LINE and here is what
+// sells the penalty-kick distance.
 const GRASS_TOP = 84;
 
 function markerPosition(outcome: ShotOutcome): { x: number; y: number } {
   const { result, accuracy, power } = outcome;
   if (result === 'miss') {
     if (power > 97) return { x: 50, y: -22 };
-    if (power < 15) return { x: 50, y: 90 };
-    return { x: accuracy < 50 ? -14 : 114, y: 48 };
+    if (power < 15) return { x: 50, y: 68 };
+    return { x: accuracy < 50 ? -14 : 114, y: 26 };
   }
   const x = Math.min(88, Math.max(12, accuracy));
-  const y = result === 'topCorner' ? 12 : result === 'great' ? 30 : 58;
+  const y = result === 'topCorner' ? 9 : result === 'great' ? 18 : 33;
   return { x, y };
 }
 
@@ -139,15 +144,23 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
           'linear-gradient(180deg, #bce6ff 0%, #d7f6e4 20%, #eafff2 50%, #eafff2 84%, #6cc257 84%, #4f9e3f 100%)',
       }}
     >
-      {/* stadium floodlight glow, peeking in from the top corners */}
+      {/* crowd: dark stand structure plus a tiled multicolor dot pattern standing in for packed fans */}
+      <div className="absolute inset-x-0 top-0 h-[11%] overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 to-slate-800" />
+        <div
+          className="absolute inset-0 opacity-60"
+          style={{
+            backgroundImage:
+              'repeating-conic-gradient(from 0deg, #f87171 0deg 90deg, #fbbf24 90deg 180deg, #60a5fa 180deg 270deg, #34d399 270deg 360deg)',
+            backgroundSize: '5px 5px',
+          }}
+        />
+        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-black/60" />
+      </div>
+
+      {/* stadium floodlight glow, shining down over the crowd */}
       <div className="pointer-events-none absolute -top-6 left-[8%] h-16 w-16 rounded-full bg-amber-100/50 blur-xl" />
       <div className="pointer-events-none absolute -top-6 right-[8%] h-16 w-16 rounded-full bg-amber-100/50 blur-xl" />
-
-      {/* crowd silhouette */}
-      <div
-        className="absolute inset-x-0 top-0 h-[9%] opacity-40"
-        style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(20,30,40,0.55) 0 5px, transparent 5px 10px)' }}
-      />
 
       {/* turf mowing stripes */}
       <div
@@ -165,16 +178,31 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
           left: '7%',
           right: '7%',
           top: '4%',
-          bottom: `${100 - GRASS_TOP}%`,
+          bottom: `${100 - GOAL_LINE}%`,
           backgroundImage:
             'repeating-linear-gradient(0deg, rgba(255,255,255,0.5) 0, rgba(255,255,255,0.5) 1px, transparent 1px, transparent 14%), repeating-linear-gradient(90deg, rgba(255,255,255,0.5) 0, rgba(255,255,255,0.5) 1px, transparent 1px, transparent 11%)',
         }}
       />
 
       {/* goalposts + crossbar */}
-      <div className="absolute rounded-sm bg-white shadow-[0_0_4px_rgba(0,0,0,0.3)]" style={{ left: '6%', width: '2.5%', top: 0, bottom: `${100 - GRASS_TOP}%` }} />
-      <div className="absolute rounded-sm bg-white shadow-[0_0_4px_rgba(0,0,0,0.3)]" style={{ right: '6%', width: '2.5%', top: 0, bottom: `${100 - GRASS_TOP}%` }} />
+      <div className="absolute rounded-sm bg-white shadow-[0_0_4px_rgba(0,0,0,0.3)]" style={{ left: '6%', width: '2.5%', top: 0, bottom: `${100 - GOAL_LINE}%` }} />
+      <div className="absolute rounded-sm bg-white shadow-[0_0_4px_rgba(0,0,0,0.3)]" style={{ right: '6%', width: '2.5%', top: 0, bottom: `${100 - GOAL_LINE}%` }} />
       <div className="absolute rounded-sm bg-white shadow-[0_0_4px_rgba(0,0,0,0.3)]" style={{ left: '6%', right: '6%', top: 0, height: '4%' }} />
+
+      {/* penalty box, drawn in forced perspective (narrow near the goal, wide toward the kicker) to
+          sell the open stretch of pitch between the goal line and the spot */}
+      <svg
+        className="pointer-events-none absolute inset-0"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <polyline points="30,50 16,84" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="0.6" />
+        <polyline points="70,50 84,84" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="0.6" />
+        <line x1="30" y1="50" x2="70" y2="50" stroke="rgba(255,255,255,0.55)" strokeWidth="0.6" />
+        <path d="M 40,50 Q 50,66 60,50" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="0.6" />
+        <circle cx="50" cy="70" r="1.4" fill="rgba(255,255,255,0.7)" />
+      </svg>
 
       {isGoalImpact && (
         <div
@@ -196,14 +224,14 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
           transitionDelay: flying ? '70ms' : '0ms',
         }}
       >
-        <GoalkeeperSprite className="h-[72px] w-14 drop-shadow-[0_4px_6px_rgba(0,0,0,0.45)]" />
+        <GoalkeeperSprite className="h-14 w-11 drop-shadow-[0_3px_4px_rgba(0,0,0,0.45)]" />
       </div>
 
       <div
         className={`absolute -translate-x-1/2 -translate-y-1/2 ${phase === 'flying' ? 'animate-kick-lunge' : ''}`}
         style={{ left: `${KICKER_POS.x}%`, top: `${KICKER_POS.y}%` }}
       >
-        <KickerSprite className="h-16 w-[52px] drop-shadow-md" />
+        <KickerSprite className="h-20 w-16 drop-shadow-md" />
       </div>
 
       {/* ground shadow, tracks the ball and shrinks as it gets airborne */}
