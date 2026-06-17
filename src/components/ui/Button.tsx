@@ -9,8 +9,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const variantClasses: Record<Variant, string> = {
   primary:
     'bg-gradient-to-b from-emerald-300 to-emerald-500 text-emerald-950 shadow-lg shadow-emerald-900/40 ring-1 ring-white/40 ring-inset active:from-emerald-400 active:to-emerald-500 active:shadow-md',
-  secondary: 'bg-white/10 text-white border border-white/25 shadow-sm active:bg-white/20',
-  ghost: 'bg-transparent text-white/80 active:text-white',
+  secondary:
+    'bg-gradient-to-b from-white/20 to-white/5 text-white border border-white/20 shadow-md shadow-black/20 ring-1 ring-white/10 ring-inset active:from-white/15 active:to-white/5 active:shadow-sm',
+  ghost: 'bg-transparent text-white/80 active:bg-white/10 active:text-white',
 };
 
 export function Button({ variant = 'primary', className = '', ...props }: ButtonProps) {

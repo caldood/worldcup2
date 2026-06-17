@@ -19,7 +19,10 @@ export function ResultOverlay({ outcome }: ResultOverlayProps) {
   return (
     <div className={`pointer-events-none absolute inset-0 flex items-center justify-center ${isGoal ? 'animate-flash-green' : 'animate-flash-red'}`}>
       <div className="animate-pop-in flex flex-col items-center gap-2 text-center">
-        <div className="text-6xl drop-shadow-lg">{copy.emoji}</div>
+        <div className="relative flex items-center justify-center">
+          <div className="pointer-events-none absolute h-20 w-20 rounded-full bg-white/15 blur-xl" aria-hidden="true" />
+          <div className="relative text-6xl drop-shadow-lg">{copy.emoji}</div>
+        </div>
         <div className={`font-display text-4xl font-extrabold tracking-wide drop-shadow-md ${copy.color}`}>{copy.title}</div>
         {isGoal && (
           <div className="font-display text-3xl font-extrabold text-white drop-shadow">

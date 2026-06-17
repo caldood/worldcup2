@@ -29,7 +29,10 @@ export function LockerScreen({ onBack }: LockerScreenProps) {
   return (
     <div className="flex h-full flex-col bg-gradient-to-b from-emerald-900 to-emerald-950">
       <div className="flex items-center gap-3 p-4">
-        <button onClick={onBack} className="rounded-full bg-black/30 px-3 py-1.5 text-sm font-semibold text-white/80 active:bg-black/50">
+        <button
+          onClick={onBack}
+          className="rounded-full bg-gradient-to-b from-white/15 to-white/5 px-3 py-1.5 text-sm font-semibold text-white/80 shadow-sm ring-1 ring-white/10 active:from-white/10 active:to-white/5"
+        >
           ← Back
         </button>
         <h1 className="font-display text-lg font-extrabold uppercase tracking-wide">Locker</h1>
@@ -48,11 +51,11 @@ export function LockerScreen({ onBack }: LockerScreenProps) {
                     key={cosmetic.id}
                     disabled={!unlocked}
                     onClick={() => dispatch({ type: 'SELECT_COSMETIC', category, id: cosmetic.id })}
-                    className={`flex flex-col items-center gap-1 rounded-2xl bg-gradient-to-br p-3 ${cosmetic.preview} ${
-                      selected ? 'ring-3 ring-white' : 'ring-1 ring-white/20'
+                    className={`flex flex-col items-center gap-1 rounded-2xl bg-gradient-to-br p-3 shadow-md shadow-black/30 ${cosmetic.preview} ${
+                      selected ? 'ring-3 ring-white shadow-[0_0_12px_rgba(255,255,255,0.5)]' : 'ring-1 ring-white/20'
                     } ${unlocked ? '' : 'opacity-35'}`}
                   >
-                    <div className="text-3xl">{unlocked ? cosmetic.emoji : '🔒'}</div>
+                    <div className="text-3xl drop-shadow">{unlocked ? cosmetic.emoji : '🔒'}</div>
                     <div className="text-xs font-bold text-white drop-shadow">{cosmetic.name}</div>
                   </button>
                 );
@@ -62,7 +65,7 @@ export function LockerScreen({ onBack }: LockerScreenProps) {
         ))}
       </div>
 
-      <div className="space-y-2 border-t border-white/10 bg-black/20 p-3">
+      <div className="space-y-2 border-t border-white/10 bg-black/30 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
         <Button variant="secondary" className="w-full text-sm" onClick={() => dispatch({ type: 'TOGGLE_SOUND' })}>
           {state.soundEnabled ? '🔊 Sound On' : '🔇 Sound Off'}
         </Button>

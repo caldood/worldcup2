@@ -59,9 +59,9 @@ export function MeterBar({ speed, indicatorClassName, trackClassName, zones, loc
 
   return (
     <div
-      className={`relative h-5 w-full overflow-hidden rounded-full border-2 border-white/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.35)] ${trackClassName}`}
+      className={`relative h-5 w-full overflow-hidden rounded-full border-2 border-white/30 shadow-[inset_0_2px_5px_rgba(0,0,0,0.4),0_2px_3px_rgba(0,0,0,0.25)] ${trackClassName}`}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-full bg-white/10" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-full bg-gradient-to-b from-white/20 to-transparent" />
       {[25, 50, 75].map((tick) => (
         <div key={tick} className="absolute top-0 h-full w-px bg-white/15" style={{ left: `${tick}%` }} />
       ))}
@@ -84,6 +84,7 @@ export function MeterBar({ speed, indicatorClassName, trackClassName, zones, loc
           style={{ left: `${displayValue}%` }}
         />
       )}
+      <div className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-black/20" />
     </div>
   );
 }

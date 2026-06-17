@@ -23,13 +23,18 @@ export function PortfolioHUD({ portfolioValue, streak, roundLabel }: PortfolioHU
   }, [portfolioValue]);
 
   return (
-    <div className="flex items-center justify-between gap-2 rounded-xl bg-black/15 px-4 py-3 shadow-inner ring-1 ring-white/5">
-      <div>
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-300/80">Portfolio</div>
-        <div
-          className={`font-display text-2xl font-extrabold tabular-nums text-white drop-shadow-sm ${pulse ? 'animate-value-pop text-emerald-300' : ''}`}
-        >
-          ${portfolioValue.toLocaleString()}
+    <div className="flex items-center justify-between gap-2 rounded-xl bg-gradient-to-r from-black/30 via-black/15 to-black/30 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-6px_12px_rgba(0,0,0,0.25)] ring-1 ring-white/10">
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-base ring-1 ring-emerald-300/30">
+          💰
+        </div>
+        <div>
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-300/80">Portfolio</div>
+          <div
+            className={`font-display text-2xl font-extrabold tabular-nums text-white drop-shadow-sm ${pulse ? 'animate-value-pop text-emerald-300' : ''}`}
+          >
+            ${portfolioValue.toLocaleString()}
+          </div>
         </div>
       </div>
       {roundLabel && (

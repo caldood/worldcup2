@@ -136,7 +136,10 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
     <div className={`relative flex h-full flex-col bg-gradient-to-b ${stadium?.preview ?? 'from-emerald-700 to-emerald-900'}`}>
       <div className="bg-black/25">
         <div className="flex items-center justify-between px-3 pt-2">
-          <button onClick={onExit} className="rounded-full bg-black/30 px-3 py-1.5 text-sm font-semibold text-white/80 active:bg-black/50">
+          <button
+            onClick={onExit}
+            className="rounded-full bg-gradient-to-b from-white/15 to-white/5 px-3 py-1.5 text-sm font-semibold text-white/80 shadow-sm ring-1 ring-white/10 active:from-white/10 active:to-white/5"
+          >
             ← Exit
           </button>
           <div className="text-xs font-bold uppercase tracking-wider text-white/70">{round.name}</div>
@@ -145,10 +148,10 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
       </div>
 
       <div className="flex items-center justify-center gap-3 py-2 text-sm text-white/90">
-        <span>
-          {round.opponent.emoji} {round.opponent.name}
+        <span className="flex items-center gap-1.5 rounded-full bg-black/20 px-3 py-1 ring-1 ring-white/10">
+          <span className="text-base">{round.opponent.emoji}</span> {round.opponent.name}
         </span>
-        <span className="rounded-full bg-black/30 px-3 py-1 text-xs font-semibold">
+        <span className="rounded-full bg-black/30 px-3 py-1 text-xs font-semibold ring-1 ring-white/10">
           Need {round.opponent.requiredGoals}/{SHOTS_PER_MATCH} to win
         </span>
       </div>
@@ -157,7 +160,9 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
         {Array.from({ length: SHOTS_PER_MATCH }).map((_, i) => (
           <div
             key={i}
-            className={`h-3 w-3 rounded-full border border-white/40 ${shotHistory[i] ? RESULT_DOT[shotHistory[i]] : 'bg-white/10'}`}
+            className={`h-3 w-3 rounded-full border border-white/40 transition-shadow ${
+              shotHistory[i] ? `${RESULT_DOT[shotHistory[i]]} shadow-[0_0_6px_rgba(255,255,255,0.5)]` : 'bg-white/10'
+            }`}
           />
         ))}
       </div>

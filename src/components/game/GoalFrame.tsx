@@ -139,6 +139,10 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
           'linear-gradient(180deg, #bce6ff 0%, #d7f6e4 20%, #eafff2 50%, #eafff2 84%, #6cc257 84%, #4f9e3f 100%)',
       }}
     >
+      {/* stadium floodlight glow, peeking in from the top corners */}
+      <div className="pointer-events-none absolute -top-6 left-[8%] h-16 w-16 rounded-full bg-amber-100/50 blur-xl" />
+      <div className="pointer-events-none absolute -top-6 right-[8%] h-16 w-16 rounded-full bg-amber-100/50 blur-xl" />
+
       {/* crowd silhouette */}
       <div
         className="absolute inset-x-0 top-0 h-[9%] opacity-40"
@@ -236,6 +240,12 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
           💨
         </div>
       )}
+
+      {/* subtle vignette for depth */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ boxShadow: 'inset 0 0 28px 6px rgba(0,0,0,0.18)' }}
+      />
     </div>
   );
 }
