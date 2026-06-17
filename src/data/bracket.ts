@@ -49,7 +49,7 @@ export const BRACKET: BracketRound[] = [
     name: 'Final',
     opponent: {
       id: 'brazil',
-      name: 'Brazil Bull Run',
+      name: 'Brazil Red Card Risk',
       emoji: '🇧🇷',
       color: '#facc15',
       requiredGoals: 4,
