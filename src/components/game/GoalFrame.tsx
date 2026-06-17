@@ -74,8 +74,11 @@ function KickerSprite({ className }: { className?: string }) {
   );
 }
 
-// Small spread of national flags scattered across the crowd strip above the goal.
-const CROWD_FLAGS = ['🇺🇸', '🇧🇷', '🇦🇷', '🇩🇪', '🇫🇷', '🇯🇵', '🇪🇸', '🇮🇹', '🇲🇽', '🇳🇬', '🇰🇷', '🇬🇧', '🇵🇹', '🇳🇱'];
+// Small spread of national flags scattered across the crowd strip above the goal. France is
+// pulled out and always placed first so every band is guaranteed to include it.
+const FRANCE_FLAG = '🇫🇷';
+const CROWD_FLAGS = ['🇺🇸', '🇧🇷', '🇦🇷', '🇩🇪', FRANCE_FLAG, '🇯🇵', '🇪🇸', '🇮🇹', '🇲🇽', '🇳🇬', '🇰🇷', '🇬🇧', '🇵🇹', '🇳🇱'];
+const OTHER_CROWD_FLAGS = CROWD_FLAGS.filter((flag) => flag !== FRANCE_FLAG);
 
 // Skin/hair/shirt color triples cycled across the crowd so neighbouring fans don't look cloned.
 const CROWD_PALETTE: { skin: string; hair: string; shirt: string }[] = [
@@ -138,14 +141,42 @@ function pseudoRandom(seed: number): number {
 }
 
 // Scatters a moderate, non-repeating spread of flags across a crowd band: x anywhere across the
-// width, y biased toward the upper portion (`topRange`) so flags wave above the fans' heads.
-function scatterFlags(count: number, seed: number, topRange: [number, number]) {
-  const [topMin, topMax] = topRange;
+// width, y biased toward the upper portion (`topRangeUnits`) so flags wave above the fans' heads.
+// Coordinates are worked out in the band's SVG viewBox units (matched 1:1 to real pixels, same
+// trick `crowdPeople` uses) so the overlap check below compares true on-screen distances rather
+// than mismatched x/y percentages. Each flag is placed via a handful of deterministic candidate
+// tries, picking the first that clears `minDist` from every flag already placed.
+function scatterFlags(
+  count: number,
+  seed: number,
+  bandWidthUnits: number,
+  bandHeightUnits: number,
+  topRangeUnits: [number, number],
+  minDist: number,
+) {
+  const [topMin, topMax] = topRangeUnits;
+  const placed: { x: number; y: number }[] = [];
   return Array.from({ length: count }, (_, i) => {
-    const flag = CROWD_FLAGS[(i * 5 + seed) % CROWD_FLAGS.length];
-    const left = 3 + pseudoRandom(seed + i * 7.31) * 94;
-    const top = topMin + pseudoRandom(seed + i * 13.7 + 1) * (topMax - topMin);
-    return { flag, left, top, key: `${seed}-${i}` };
+    const flag = i === 0 ? FRANCE_FLAG : OTHER_CROWD_FLAGS[(i - 1 + seed) % OTHER_CROWD_FLAGS.length];
+    let candidate = { x: bandWidthUnits / 2, y: (topMin + topMax) / 2 };
+    let bestClearance = -Infinity;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const x = pseudoRandom(seed + i * 17.23 + attempt * 3.71) * bandWidthUnits;
+      const y = topMin + pseudoRandom(seed + i * 23.11 + attempt * 5.93 + 1) * (topMax - topMin);
+      const clearance = placed.reduce((min, p) => Math.min(min, Math.hypot(p.x - x, p.y - y)), Infinity);
+      if (clearance > bestClearance) {
+        bestClearance = clearance;
+        candidate = { x, y };
+      }
+      if (clearance >= minDist) break;
+    }
+    placed.push(candidate);
+    return {
+      flag,
+      left: (candidate.x / bandWidthUnits) * 100,
+      top: (candidate.y / bandHeightUnits) * 100,
+      key: `${seed}-${i}`,
+    };
   });
 }
 
@@ -226,10 +257,10 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
         <div className="pointer-events-none absolute top-3 left-[10%] h-12 w-12 rounded-full bg-amber-100/40 blur-xl" />
         <div className="pointer-events-none absolute top-3 right-[10%] h-12 w-12 rounded-full bg-amber-100/40 blur-xl" />
         <div className="absolute inset-0">
-          {scatterFlags(10, 1, [6, 58]).map(({ flag, left, top, key }) => (
+          {scatterFlags(10, 1, 100, 25, [1.5, 14.5], 11).map(({ flag, left, top, key }) => (
             <span
               key={key}
-              className="absolute -translate-x-1/2 -translate-y-1/2 text-2xl leading-none drop-shadow-sm"
+              className="absolute -translate-x-1/2 -translate-y-1/2 text-3xl leading-none drop-shadow-sm"
               style={{ left: `${left}%`, top: `${top}%` }}
             >
               {flag}
@@ -254,10 +285,10 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
         </svg>
         <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-black/60" />
         <div className="absolute inset-0">
-          {scatterFlags(6, 31, [10, 60]).map(({ flag, left, top, key }) => (
+          {scatterFlags(6, 31, 100, 6.1875, [0.6, 3.7], 5.5).map(({ flag, left, top, key }) => (
             <span
               key={key}
-              className="absolute -translate-x-1/2 -translate-y-1/2 text-sm leading-none drop-shadow-sm"
+              className="absolute -translate-x-1/2 -translate-y-1/2 text-base leading-none drop-shadow-sm"
               style={{ left: `${left}%`, top: `${top}%` }}
             >
               {flag}
