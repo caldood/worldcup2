@@ -36,40 +36,44 @@ function GoalkeeperSprite({ className }: { className?: string }) {
   );
 }
 
-// Drawn from flat polygons/shapes too: white-and-red USA kit, mid-strike with the kicking
-// leg swung forward and the arms out for balance.
+// Clean white-and-navy USA kit built from rounded rects rather than sharp polygons, so it reads
+// as a tidy player rather than a jagged paper cutout: planted leg behind, kicking leg swung
+// forward toward the ball, arms bent out for balance.
 function KickerSprite({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 100 130" className={className} aria-hidden="true">
-      {/* planted leg */}
-      <polygon points="42,68 38,118 28,120 34,68" fill="#1e3a8a" />
-      <polygon points="24,114 38,114 36,122 22,122" fill="#0f172a" />
-      {/* kicking leg, swung forward */}
-      <polygon points="58,70 86,96 80,104 54,80" fill="#1e3a8a" />
-      <polygon points="78,98 92,108 88,116 76,106" fill="#0f172a" />
-      {/* shorts */}
-      <rect x="34" y="62" width="30" height="18" rx="3" fill="#1e3a8a" />
-      {/* jersey, white with a navy/red USA sash and collar stripe */}
-      <defs>
-        <clipPath id="kicker-jersey-clip">
-          <polygon points="30,24 70,24 66,66 34,66" />
-        </clipPath>
-      </defs>
-      <polygon points="30,24 70,24 66,66 34,66" fill="#f8fafc" stroke="#b91c1c" strokeWidth="2" />
-      <g clipPath="url(#kicker-jersey-clip)">
-        <polygon points="22,18 40,18 56,72 38,72" fill="#1e3a8a" />
-        <polygon points="40,18 48,18 64,72 56,72" fill="#b91c1c" />
+      {/* planted leg, slight backward lean for balance */}
+      <g transform="rotate(-8 38 70)">
+        <rect x="31" y="68" width="14" height="46" rx="6" fill="#f8fafc" stroke="#1d4ed8" strokeWidth="1.5" />
+        <rect x="27" y="108" width="21" height="10" rx="3" fill="#1e293b" />
       </g>
-      <rect x="30" y="24" width="40" height="6" fill="#b91c1c" />
-      {/* arms bent for balance */}
-      <line x1="32" y1="32" x2="14" y2="46" stroke="#f8fafc" strokeWidth="12" strokeLinecap="round" />
-      <line x1="68" y1="32" x2="84" y2="20" stroke="#f8fafc" strokeWidth="12" strokeLinecap="round" />
-      <circle cx="13" cy="48" r="6" fill="#d8a675" />
-      <circle cx="85" cy="18" r="6" fill="#d8a675" />
+
+      {/* kicking leg, swung forward toward the ball */}
+      <g transform="rotate(55 58 70)">
+        <rect x="51" y="68" width="14" height="46" rx="6" fill="#f8fafc" stroke="#1d4ed8" strokeWidth="1.5" />
+        <rect x="47" y="108" width="21" height="10" rx="3" fill="#1e293b" />
+      </g>
+
+      {/* shorts, navy with red side stripes */}
+      <rect x="34" y="60" width="32" height="20" rx="7" fill="#1e3a8a" />
+      <rect x="34" y="60" width="4" height="20" fill="#b91c1c" />
+      <rect x="62" y="60" width="4" height="20" fill="#b91c1c" />
+
+      {/* jersey, clean white shirt with a navy yoke and a red hem stripe */}
+      <rect x="32" y="24" width="36" height="38" rx="9" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+      <path d="M32 29 Q50 19 68 29 L68 24.5 Q50 15 32 24.5 Z" fill="#1e3a8a" />
+      <rect x="32" y="55" width="36" height="5" rx="2" fill="#b91c1c" />
+
+      {/* arms, bent out for balance */}
+      <line x1="35" y1="32" x2="15" y2="46" stroke="#f8fafc" strokeWidth="11" strokeLinecap="round" />
+      <line x1="65" y1="30" x2="85" y2="16" stroke="#f8fafc" strokeWidth="11" strokeLinecap="round" />
+      <circle cx="14" cy="48" r="6" fill="#d8a675" />
+      <circle cx="86" cy="14" r="6" fill="#d8a675" />
+
       {/* neck + head */}
-      <rect x="44" y="18" width="12" height="8" fill="#d8a675" />
-      <circle cx="50" cy="13" r="12" fill="#d8a675" stroke="#7c4a25" strokeWidth="1.5" />
-      <path d="M38 8 a12 12 0 0 1 24 0 z" fill="#1f2937" />
+      <rect x="45" y="19" width="10" height="7" fill="#d8a675" />
+      <circle cx="50" cy="13" r="11" fill="#d8a675" stroke="#7c4a25" strokeWidth="1.5" />
+      <path d="M39 8 a11 11 0 0 1 22 0 z" fill="#1f2937" />
     </svg>
   );
 }
@@ -180,8 +184,11 @@ function scatterFlags(
   });
 }
 
-const BALL_START = { x: 50, y: 97 };
-const KICKER_POS = { x: 50, y: 95 };
+// Ball sits ahead (toward the goal, smaller y) and off to one side of where the kicker stands,
+// like a real penalty spot rather than glued to his feet. KICKER_POS.y is kept well clear of the
+// field container's bottom edge so the (tall) kicker sprite never gets clipped.
+const BALL_START = { x: 60, y: 70 };
+const KICKER_POS = { x: 45, y: 78 };
 // Centered in the (now much shorter) net so the goal reads as far away rather than filling the frame.
 const KEEPER_POS = { x: 50, y: 25 };
 // Goal line: bottom edge of the posts/net. Keeping this well above the foreground turf (instead of
@@ -301,15 +308,6 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
       <div className="pointer-events-none absolute -top-6 left-[8%] h-16 w-16 rounded-full bg-amber-100/50 blur-xl" />
       <div className="pointer-events-none absolute -top-6 right-[8%] h-16 w-16 rounded-full bg-amber-100/50 blur-xl" />
 
-      {/* turf mowing stripes */}
-      <div
-        className="absolute inset-x-0 bottom-0"
-        style={{
-          top: `${GRASS_TOP}%`,
-          backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.14) 0 9%, transparent 9% 18%)',
-        }}
-      />
-
       {/* soft sunlight sheen across the open pitch, just for depth, no field markings */}
       <div
         className="pointer-events-none absolute inset-x-0"
@@ -358,7 +356,7 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
           transitionDelay: flying ? '70ms' : '0ms',
         }}
       >
-        <GoalkeeperSprite className="h-14 w-11 drop-shadow-[0_3px_4px_rgba(0,0,0,0.45)]" />
+        <GoalkeeperSprite className="h-16 w-12 drop-shadow-[0_3px_4px_rgba(0,0,0,0.45)]" />
       </div>
 
       <div
