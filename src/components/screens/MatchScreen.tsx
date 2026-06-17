@@ -22,6 +22,9 @@ const ACCURACY_ZONES: Zone[] = [
 
 const POWER_ZONES: Zone[] = [{ left: 15, width: 82, className: 'bg-emerald-400/35' }];
 
+// Matches the flight-to-impact timing in GoalFrame so the sfx/overlay land with the ball.
+const IMPACT_DELAY = 460;
+
 const RESULT_DOT: Record<ShotResult, string> = {
   topCorner: 'bg-yellow-400',
   great: 'bg-orange-400',
@@ -47,6 +50,7 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
   const [lockedPower, setLockedPower] = useState<number | null>(null);
   const [outcome, setOutcome] = useState<ShotOutcome | null>(null);
   const [matchWon, setMatchWon] = useState<boolean | null>(null);
+  const [showOverlay, setShowOverlay] = useState(false);
 
   const powerGetter = useRef<() => number>(() => 0);
   const accuracyGetter = useRef<() => number>(() => 0);
@@ -57,6 +61,7 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
   const resetForNextShot = useCallback(() => {
     setLockedPower(null);
     setOutcome(null);
+    setShowOverlay(false);
     setPhase('power');
   }, []);
 
@@ -78,16 +83,21 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
       setOutcome(computed);
       dispatch({ type: 'TAKE_SHOT', power: lockedPower, accuracy });
 
-      if (computed.result === 'topCorner') play(sfx.topCorner);
-      else if (computed.result === 'great') play(sfx.great);
-      else if (computed.result === 'goal') play(sfx.goal);
-      else play(sfx.miss);
-
       const isGoal = computed.result !== 'miss';
       const newGoals = goalsThisMatch + (isGoal ? 1 : 0);
       setGoalsThisMatch(newGoals);
       setShotHistory((prev) => [...prev, computed.result]);
       setPhase('result');
+      setShowOverlay(false);
+
+      // Let the ball reach the net before the impact sound/result card land.
+      window.setTimeout(() => {
+        if (computed.result === 'topCorner') play(sfx.topCorner);
+        else if (computed.result === 'great') play(sfx.great);
+        else if (computed.result === 'goal') play(sfx.goal);
+        else play(sfx.miss);
+        setShowOverlay(true);
+      }, IMPACT_DELAY);
 
       const nextShotIndex = shotIndex + 1;
       window.setTimeout(() => {
@@ -189,7 +199,7 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
         />
       )}
 
-      {phase === 'result' && outcome && <ResultOverlay outcome={outcome} />}
+      {phase === 'result' && outcome && showOverlay && <ResultOverlay outcome={outcome} />}
 
       {phase === 'matchEnd' && matchWon !== null && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 px-6">
