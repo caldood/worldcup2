@@ -49,21 +49,23 @@ function KickerSprite({ className }: { className?: string }) {
       <polygon points="78,98 92,108 88,116 76,106" fill="#0f172a" />
       {/* shorts */}
       <rect x="34" y="62" width="30" height="18" rx="3" fill="#1e3a8a" />
-      {/* jersey, white with a red collar stripe */}
+      {/* jersey, white with a navy/red USA sash and collar stripe */}
+      <defs>
+        <clipPath id="kicker-jersey-clip">
+          <polygon points="30,24 70,24 66,66 34,66" />
+        </clipPath>
+      </defs>
       <polygon points="30,24 70,24 66,66 34,66" fill="#f8fafc" stroke="#b91c1c" strokeWidth="2" />
+      <g clipPath="url(#kicker-jersey-clip)">
+        <polygon points="22,18 40,18 56,72 38,72" fill="#1e3a8a" />
+        <polygon points="40,18 48,18 64,72 56,72" fill="#b91c1c" />
+      </g>
       <rect x="30" y="24" width="40" height="6" fill="#b91c1c" />
       {/* arms bent for balance */}
       <line x1="32" y1="32" x2="14" y2="46" stroke="#f8fafc" strokeWidth="12" strokeLinecap="round" />
       <line x1="68" y1="32" x2="84" y2="20" stroke="#f8fafc" strokeWidth="12" strokeLinecap="round" />
       <circle cx="13" cy="48" r="6" fill="#d8a675" />
       <circle cx="85" cy="18" r="6" fill="#d8a675" />
-      {/* small USA flag held in the raised hand */}
-      <line x1="85" y1="17" x2="85" y2="1" stroke="#7c4a25" strokeWidth="2" strokeLinecap="round" />
-      <rect x="85" y="0" width="14" height="11" fill="#b91c1c" />
-      <rect x="85" y="2.2" width="14" height="1.6" fill="#f8fafc" />
-      <rect x="85" y="5.4" width="14" height="1.6" fill="#f8fafc" />
-      <rect x="85" y="8.6" width="14" height="1.6" fill="#f8fafc" />
-      <rect x="85" y="0" width="6" height="6" fill="#1e3a8a" />
       {/* neck + head */}
       <rect x="44" y="18" width="12" height="8" fill="#d8a675" />
       <circle cx="50" cy="13" r="12" fill="#d8a675" stroke="#7c4a25" strokeWidth="1.5" />
@@ -141,7 +143,7 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
       className="relative mx-auto aspect-[16/9] w-full max-w-sm overflow-hidden rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.35)] ring-1 ring-black/10"
       style={{
         background:
-          'linear-gradient(180deg, #bce6ff 0%, #d7f6e4 20%, #eafff2 50%, #eafff2 84%, #6cc257 84%, #4f9e3f 100%)',
+          'linear-gradient(180deg, #bce6ff 0%, #cdeec2 11%, #9ed98e 46%, #6cc257 84%, #4f9e3f 100%)',
       }}
     >
       {/* crowd: dark stand structure plus a tiled multicolor dot pattern standing in for packed fans */}
