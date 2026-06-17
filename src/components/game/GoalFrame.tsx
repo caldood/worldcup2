@@ -57,6 +57,13 @@ function KickerSprite({ className }: { className?: string }) {
       <line x1="68" y1="32" x2="84" y2="20" stroke="#f8fafc" strokeWidth="12" strokeLinecap="round" />
       <circle cx="13" cy="48" r="6" fill="#d8a675" />
       <circle cx="85" cy="18" r="6" fill="#d8a675" />
+      {/* small USA flag held in the raised hand */}
+      <line x1="85" y1="17" x2="85" y2="1" stroke="#7c4a25" strokeWidth="2" strokeLinecap="round" />
+      <rect x="85" y="0" width="14" height="11" fill="#b91c1c" />
+      <rect x="85" y="2.2" width="14" height="1.6" fill="#f8fafc" />
+      <rect x="85" y="5.4" width="14" height="1.6" fill="#f8fafc" />
+      <rect x="85" y="8.6" width="14" height="1.6" fill="#f8fafc" />
+      <rect x="85" y="0" width="6" height="6" fill="#1e3a8a" />
       {/* neck + head */}
       <rect x="44" y="18" width="12" height="8" fill="#d8a675" />
       <circle cx="50" cy="13" r="12" fill="#d8a675" stroke="#7c4a25" strokeWidth="1.5" />
@@ -192,10 +199,7 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
         className={`absolute -translate-x-1/2 -translate-y-1/2 ${phase === 'flying' ? 'animate-kick-lunge' : ''}`}
         style={{ left: `${KICKER_POS.x}%`, top: `${KICKER_POS.y}%` }}
       >
-        <div className="relative">
-          <KickerSprite className="h-16 w-[52px] drop-shadow-md" />
-          <span className="absolute -right-1 top-0 text-sm drop-shadow">🇺🇸</span>
-        </div>
+        <KickerSprite className="h-16 w-[52px] drop-shadow-md" />
       </div>
 
       {/* ground shadow, tracks the ball and shrinks as it gets airborne */}
