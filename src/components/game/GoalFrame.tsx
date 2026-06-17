@@ -10,8 +10,8 @@ interface GoalFrameProps {
 
 const BALL_START = { x: 50, y: 97 };
 const KICKER_POS = { x: 50, y: 95 };
-// Standing on the goal line, just inside the net mouth, blocking the goal.
-const KEEPER_POS = { x: 50, y: 76 };
+// Up near the crossbar so the keeper's sprite doesn't overlap the kicker below.
+const KEEPER_POS = { x: 50, y: 60 };
 // The pitch/turf strip starts here; net targets live above it, between this and the crossbar.
 const GRASS_TOP = 84;
 
@@ -38,7 +38,7 @@ function keeperDive(outcome: ShotOutcome): { x: number; rotate: number; jump: bo
 
 type Phase = 'idle' | 'flying' | 'impact';
 
-export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🤾', kickerEmoji = '🏃' }: GoalFrameProps) {
+export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🙅', kickerEmoji = '🏃' }: GoalFrameProps) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [trackedOutcome, setTrackedOutcome] = useState(outcome);
 
@@ -132,10 +132,13 @@ export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🤾', kickerEmoj
       </div>
 
       <div
-        className={`absolute -translate-x-1/2 -translate-y-1/2 text-5xl drop-shadow-md ${phase === 'flying' ? 'animate-kick-lunge' : ''}`}
+        className={`absolute -translate-x-1/2 -translate-y-1/2 ${phase === 'flying' ? 'animate-kick-lunge' : ''}`}
         style={{ left: `${KICKER_POS.x}%`, top: `${KICKER_POS.y}%` }}
       >
-        {kickerEmoji}
+        <div className="relative text-5xl drop-shadow-md">
+          {kickerEmoji}
+          <span className="absolute -right-1.5 top-1 text-base drop-shadow">🇺🇸</span>
+        </div>
       </div>
 
       {/* ground shadow, tracks the ball and shrinks as it gets airborne */}

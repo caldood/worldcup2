@@ -18,6 +18,7 @@ export function MainMenu({ onPlay }: MainMenuProps) {
           aria-hidden="true"
         />
         <div className="relative text-6xl drop-shadow-lg">⚽</div>
+        <div className="text-xs font-bold uppercase tracking-[0.2em] text-amber-300/90">World Cup 2026</div>
         <h1 className="font-display text-4xl font-extrabold tracking-tight text-white drop-shadow-lg">Goal Trader</h1>
         <p className="text-sm font-medium text-emerald-100/90">Score goals. Grow your portfolio.</p>
       </div>
