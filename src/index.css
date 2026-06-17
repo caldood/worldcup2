@@ -101,3 +101,12 @@ body {
 .animate-pulse-glow {
   animation: pulse-glow 1.6s ease-out infinite;
 }
+
+@keyframes value-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.animate-value-pop {
+  animation: value-pop 0.45s ease-out;
+}

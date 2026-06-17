@@ -58,7 +58,13 @@ export function MeterBar({ speed, indicatorClassName, trackClassName, zones, loc
   const displayValue = lockedValue ?? 0;
 
   return (
-    <div className={`relative h-5 w-full overflow-hidden rounded-full border-2 border-white/30 ${trackClassName}`}>
+    <div
+      className={`relative h-5 w-full overflow-hidden rounded-full border-2 border-white/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.35)] ${trackClassName}`}
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-full bg-white/10" />
+      {[25, 50, 75].map((tick) => (
+        <div key={tick} className="absolute top-0 h-full w-px bg-white/15" style={{ left: `${tick}%` }} />
+      ))}
       {zones?.map((zone, i) => (
         <div
           key={i}
@@ -69,12 +75,12 @@ export function MeterBar({ speed, indicatorClassName, trackClassName, zones, loc
       {lockedValue === null ? (
         <div
           ref={indicatorRef}
-          className={`absolute top-0 h-full w-[3px] -translate-x-1/2 ${indicatorClassName}`}
+          className={`absolute top-0 h-full w-[3px] -translate-x-1/2 rounded-full ${indicatorClassName}`}
           style={{ left: '0%' }}
         />
       ) : (
         <div
-          className="absolute top-0 h-full w-[3px] -translate-x-1/2 bg-white shadow-[0_0_8px_white]"
+          className="absolute top-0 h-full w-[3px] -translate-x-1/2 rounded-full bg-white shadow-[0_0_8px_white]"
           style={{ left: `${displayValue}%` }}
         />
       )}

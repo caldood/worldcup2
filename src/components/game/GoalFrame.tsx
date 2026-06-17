@@ -10,16 +10,18 @@ interface GoalFrameProps {
 
 const BALL_START = { x: 50, y: 97 };
 const KICKER_POS = { x: 50, y: 105 };
+// The pitch/turf strip starts here; net targets live above it, between this and the crossbar.
+const GRASS_TOP = 84;
 
 function markerPosition(outcome: ShotOutcome): { x: number; y: number } {
   const { result, accuracy, power } = outcome;
   if (result === 'miss') {
     if (power > 97) return { x: 50, y: -22 };
-    if (power < 15) return { x: 50, y: 58 };
+    if (power < 15) return { x: 50, y: 90 };
     return { x: accuracy < 50 ? -14 : 114, y: 48 };
   }
-  const x = Math.min(92, Math.max(8, accuracy));
-  const y = result === 'topCorner' ? 10 : result === 'great' ? 28 : 56;
+  const x = Math.min(88, Math.max(12, accuracy));
+  const y = result === 'topCorner' ? 12 : result === 'great' ? 30 : 58;
   return { x, y };
 }
 
@@ -60,17 +62,49 @@ export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🧤', kickerEmoj
   const dive = outcome ? keeperDive(outcome) : null;
   const isGoalImpact = phase === 'impact' && outcome && outcome.result !== 'miss';
   const isWhiffImpact = phase === 'impact' && outcome && outcome.result === 'miss';
+  // Ball closer to the grass casts a bigger, darker shadow than one high in the air.
+  const groundedness = Math.max(0.3, Math.min(1, ballPos.y / GRASS_TOP));
 
   return (
-    <div className="relative mx-auto aspect-[16/9] w-full max-w-sm overflow-hidden rounded-xl bg-[linear-gradient(180deg,#e8fff3_0%,#cdebd9_100%)]">
-      {/* net grid */}
+    <div
+      className="relative mx-auto aspect-[16/9] w-full max-w-sm overflow-hidden rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.35)] ring-1 ring-black/10"
+      style={{
+        background:
+          'linear-gradient(180deg, #bce6ff 0%, #d7f6e4 20%, #eafff2 50%, #eafff2 84%, #6cc257 84%, #4f9e3f 100%)',
+      }}
+    >
+      {/* crowd silhouette */}
       <div
-        className="absolute inset-2 rounded-sm border-2 border-white/90"
+        className="absolute inset-x-0 top-0 h-[9%] opacity-40"
+        style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(20,30,40,0.55) 0 5px, transparent 5px 10px)' }}
+      />
+
+      {/* turf mowing stripes */}
+      <div
+        className="absolute inset-x-0 bottom-0"
         style={{
-          backgroundImage:
-            'repeating-linear-gradient(0deg, rgba(255,255,255,0.5) 0, rgba(255,255,255,0.5) 1px, transparent 1px, transparent 12%), repeating-linear-gradient(90deg, rgba(255,255,255,0.5) 0, rgba(255,255,255,0.5) 1px, transparent 1px, transparent 10%)',
+          top: `${GRASS_TOP}%`,
+          backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.14) 0 9%, transparent 9% 18%)',
         }}
       />
+
+      {/* net grid, framed inside the posts */}
+      <div
+        className="absolute rounded-sm border-2 border-white/90"
+        style={{
+          left: '7%',
+          right: '7%',
+          top: '4%',
+          bottom: `${100 - GRASS_TOP}%`,
+          backgroundImage:
+            'repeating-linear-gradient(0deg, rgba(255,255,255,0.5) 0, rgba(255,255,255,0.5) 1px, transparent 1px, transparent 14%), repeating-linear-gradient(90deg, rgba(255,255,255,0.5) 0, rgba(255,255,255,0.5) 1px, transparent 1px, transparent 11%)',
+        }}
+      />
+
+      {/* goalposts + crossbar */}
+      <div className="absolute rounded-sm bg-white shadow-[0_0_4px_rgba(0,0,0,0.3)]" style={{ left: '6%', width: '2.5%', top: 0, bottom: `${100 - GRASS_TOP}%` }} />
+      <div className="absolute rounded-sm bg-white shadow-[0_0_4px_rgba(0,0,0,0.3)]" style={{ right: '6%', width: '2.5%', top: 0, bottom: `${100 - GRASS_TOP}%` }} />
+      <div className="absolute rounded-sm bg-white shadow-[0_0_4px_rgba(0,0,0,0.3)]" style={{ left: '6%', right: '6%', top: 0, height: '4%' }} />
 
       {isGoalImpact && (
         <div
@@ -81,7 +115,7 @@ export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🧤', kickerEmoj
       )}
 
       <div
-        className="absolute bottom-2 left-1/2 text-3xl ease-out"
+        className="absolute bottom-2 left-1/2 text-3xl drop-shadow-md ease-out"
         style={{
           transform: dive
             ? `translateX(calc(-50% + ${flying ? dive.x : 0}px)) translateY(${flying && dive.jump ? -18 : 0}px) rotate(${flying ? dive.rotate : 0}deg)`
@@ -99,6 +133,19 @@ export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🧤', kickerEmoj
       >
         {kickerEmoji}
       </div>
+
+      {/* ground shadow, tracks the ball and shrinks as it gets airborne */}
+      <div
+        className="absolute -translate-x-1/2 rounded-full bg-black/40 blur-[1.5px]"
+        style={{
+          left: `${ballPos.x}%`,
+          top: `${Math.min(96, ballPos.y + 3)}%`,
+          width: 16 * groundedness,
+          height: 5 * groundedness,
+          opacity: 0.15 + 0.35 * groundedness,
+          transition: 'left 0.42s cubic-bezier(.28,.74,.34,1), top 0.42s cubic-bezier(.28,.74,.34,1), width 0.42s, height 0.42s, opacity 0.42s',
+        }}
+      />
 
       <div
         className="absolute -translate-x-1/2 -translate-y-1/2 text-3xl drop-shadow-md"

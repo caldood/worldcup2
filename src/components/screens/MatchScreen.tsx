@@ -25,6 +25,13 @@ const POWER_ZONES: Zone[] = [{ left: 15, width: 82, className: 'bg-emerald-400/3
 // Matches the flight-to-impact timing in GoalFrame so the sfx/overlay land with the ball.
 const IMPACT_DELAY = 460;
 
+const CONFETTI_COLORS = ['bg-emerald-400', 'bg-amber-300', 'bg-sky-300', 'bg-rose-400', 'bg-violet-400'];
+const CONFETTI = Array.from({ length: 24 }, (_, i) => ({
+  left: (i * 37) % 100,
+  delay: (i * 53) % 600,
+  color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+}));
+
 const RESULT_DOT: Record<ShotResult, string> = {
   topCorner: 'bg-yellow-400',
   great: 'bg-orange-400',
@@ -203,6 +210,17 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
 
       {phase === 'matchEnd' && matchWon !== null && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 px-6">
+          {matchWon && (
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-full overflow-hidden">
+              {CONFETTI.map((c, i) => (
+                <div
+                  key={i}
+                  className={`absolute top-0 h-2 w-2 rounded-sm animate-confetti ${c.color}`}
+                  style={{ left: `${c.left}%`, animationDelay: `${c.delay}ms` }}
+                />
+              ))}
+            </div>
+          )}
           <div className="animate-pop-in flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl bg-emerald-950/95 p-6 text-center shadow-2xl ring-1 ring-white/10">
             <div className="text-5xl">{matchWon ? '🏆' : '📉'}</div>
             <div className="font-display text-2xl font-extrabold">{matchWon ? 'MATCH WON!' : 'MATCH LOST'}</div>
