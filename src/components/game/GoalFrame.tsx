@@ -74,6 +74,9 @@ function KickerSprite({ className }: { className?: string }) {
   );
 }
 
+// Small spread of national flags scattered across the crowd strip above the goal.
+const CROWD_FLAGS = ['🇺🇸', '🇧🇷', '🇦🇷', '🇩🇪', '🇫🇷', '🇯🇵', '🇪🇸', '🇮🇹', '🇲🇽', '🇳🇬', '🇰🇷', '🇬🇧', '🇵🇹', '🇳🇱'];
+
 const BALL_START = { x: 50, y: 97 };
 const KICKER_POS = { x: 50, y: 95 };
 // Centered in the (now much shorter) net so the goal reads as far away rather than filling the frame.
@@ -146,7 +149,8 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
           'linear-gradient(180deg, #bce6ff 0%, #cdeec2 11%, #9ed98e 46%, #6cc257 84%, #4f9e3f 100%)',
       }}
     >
-      {/* crowd: dark stand structure plus a tiled multicolor dot pattern standing in for packed fans */}
+      {/* crowd: dark stand structure, a tiled multicolor dot pattern standing in for packed fans,
+          and a scatter of national flags waving above them */}
       <div className="absolute inset-x-0 top-0 h-[11%] overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900 to-slate-800" />
         <div
@@ -158,6 +162,13 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
           }}
         />
         <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-black/60" />
+        <div className="absolute inset-x-0 bottom-0 flex items-center justify-around px-1 text-[10px] leading-none drop-shadow-sm">
+          {CROWD_FLAGS.map((flag, i) => (
+            <span key={flag} style={{ transform: `translateY(${(i % 3) - 1}px)` }}>
+              {flag}
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* stadium floodlight glow, shining down over the crowd */}
@@ -170,6 +181,16 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
         style={{
           top: `${GRASS_TOP}%`,
           backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.14) 0 9%, transparent 9% 18%)',
+        }}
+      />
+
+      {/* soft sunlight sheen across the open pitch, just for depth, no field markings */}
+      <div
+        className="pointer-events-none absolute inset-x-0"
+        style={{
+          top: '11%',
+          bottom: `${100 - GRASS_TOP}%`,
+          background: 'radial-gradient(60% 70% at 50% 25%, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 75%)',
         }}
       />
 
@@ -190,22 +211,6 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
       <div className="absolute rounded-sm bg-white shadow-[0_0_4px_rgba(0,0,0,0.3)]" style={{ left: '6%', width: '2.5%', top: 0, bottom: `${100 - GOAL_LINE}%` }} />
       <div className="absolute rounded-sm bg-white shadow-[0_0_4px_rgba(0,0,0,0.3)]" style={{ right: '6%', width: '2.5%', top: 0, bottom: `${100 - GOAL_LINE}%` }} />
       <div className="absolute rounded-sm bg-white shadow-[0_0_4px_rgba(0,0,0,0.3)]" style={{ left: '6%', right: '6%', top: 0, height: '4%' }} />
-
-      {/* penalty box, drawn in forced perspective (narrow near the goal, wide toward the kicker) to
-          sell the open stretch of pitch between the goal line and the spot. The viewBox matches the
-          container's 16:9 aspect ratio (instead of a stretched 100x100 square) so circles/curves/strokes
-          render true instead of squashed into ellipses. */}
-      <svg
-        className="pointer-events-none absolute inset-0"
-        viewBox="0 0 100 56.25"
-        aria-hidden="true"
-      >
-        <polyline points="30,28.1 16,47.3" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="0.5" />
-        <polyline points="70,28.1 84,47.3" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="0.5" />
-        <line x1="30" y1="28.1" x2="70" y2="28.1" stroke="rgba(255,255,255,0.55)" strokeWidth="0.5" />
-        <path d="M 40,28.1 Q 50,37.1 60,28.1" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="0.5" />
-        <circle cx="50" cy="39.4" r="1" fill="rgba(255,255,255,0.7)" />
-      </svg>
 
       {isGoalImpact && (
         <div
