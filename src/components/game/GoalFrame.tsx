@@ -142,13 +142,38 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
   const groundedness = Math.max(0.3, Math.min(1, ballPos.y / GRASS_TOP));
 
   return (
-    <div
-      className="relative mx-auto aspect-[16/9] w-full max-w-sm overflow-hidden rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.35)] ring-1 ring-black/10"
-      style={{
-        background:
-          'linear-gradient(180deg, #bce6ff 0%, #cdeec2 11%, #9ed98e 46%, #6cc257 84%, #4f9e3f 100%)',
-      }}
-    >
+    <div className="mx-auto w-full max-w-sm overflow-hidden rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.35)] ring-1 ring-black/10">
+      {/* upper stands: a purely additive extension above the existing goal scene, so the crowd
+          reads as a full stadium bowl towering over the goal rather than a thin strip pinned to it.
+          Nothing in the scene below is touched or repositioned. */}
+      <div className="relative aspect-[16/4] w-full overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900" />
+        <div
+          className="absolute inset-0 opacity-60"
+          style={{
+            backgroundImage:
+              'repeating-conic-gradient(from 0deg, #f87171 0deg 90deg, #fbbf24 90deg 180deg, #60a5fa 180deg 270deg, #34d399 270deg 360deg)',
+            backgroundSize: '6px 6px',
+          }}
+        />
+        <div className="pointer-events-none absolute top-3 left-[10%] h-12 w-12 rounded-full bg-amber-100/40 blur-xl" />
+        <div className="pointer-events-none absolute top-3 right-[10%] h-12 w-12 rounded-full bg-amber-100/40 blur-xl" />
+        <div className="absolute inset-x-0 bottom-2 flex items-center justify-around px-1 text-xs leading-none drop-shadow-sm">
+          {CROWD_FLAGS.map((flag, i) => (
+            <span key={flag} style={{ transform: `translateY(${(i % 3) - 1}px)` }}>
+              {flag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div
+        className="relative aspect-[16/9] w-full overflow-hidden"
+        style={{
+          background:
+            'linear-gradient(180deg, #bce6ff 0%, #cdeec2 11%, #9ed98e 46%, #6cc257 84%, #4f9e3f 100%)',
+        }}
+      >
       {/* crowd: dark stand structure, a tiled multicolor dot pattern standing in for packed fans,
           and a scatter of national flags waving above them */}
       <div className="absolute inset-x-0 top-0 h-[11%] overflow-hidden">
@@ -282,6 +307,7 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
         className="pointer-events-none absolute inset-0"
         style={{ boxShadow: 'inset 0 0 28px 6px rgba(0,0,0,0.18)' }}
       />
+      </div>
     </div>
   );
 }
