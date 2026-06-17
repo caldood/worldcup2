@@ -24,6 +24,16 @@ body {
   -webkit-touch-callout: none;
 }
 
+@keyframes kick-lunge {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  35% { transform: translate(-50%, calc(-50% - 12px)) rotate(-24deg); }
+  70% { transform: translate(-50%, calc(-50% + 4px)) rotate(10deg); }
+  100% { transform: translate(-50%, -50%) rotate(0deg); }
+}
+.animate-kick-lunge {
+  animation: kick-lunge 0.36s ease-out;
+}
+
 @keyframes net-ripple {
   0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0.9; border-width: 3px; }
   100% { transform: translate(-50%, -50%) scale(3.2); opacity: 0; border-width: 1px; }

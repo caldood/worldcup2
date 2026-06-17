@@ -5,9 +5,11 @@ interface GoalFrameProps {
   outcome: ShotOutcome | null;
   ballEmoji: string;
   keeperEmoji?: string;
+  kickerEmoji?: string;
 }
 
-const BALL_START = { x: 50, y: 102 };
+const BALL_START = { x: 50, y: 97 };
+const KICKER_POS = { x: 50, y: 105 };
 
 function markerPosition(outcome: ShotOutcome): { x: number; y: number } {
   const { result, accuracy, power } = outcome;
@@ -32,7 +34,7 @@ function keeperDive(outcome: ShotOutcome): { x: number; rotate: number; jump: bo
 
 type Phase = 'idle' | 'flying' | 'impact';
 
-export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🧤' }: GoalFrameProps) {
+export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🧤', kickerEmoji = '🏃' }: GoalFrameProps) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [trackedOutcome, setTrackedOutcome] = useState(outcome);
 
@@ -89,6 +91,13 @@ export function GoalFrame({ outcome, ballEmoji, keeperEmoji = '🧤' }: GoalFram
         }}
       >
         {keeperEmoji}
+      </div>
+
+      <div
+        className={`absolute -translate-x-1/2 -translate-y-1/2 text-4xl drop-shadow-md ${phase === 'flying' ? 'animate-kick-lunge' : ''}`}
+        style={{ left: `${KICKER_POS.x}%`, top: `${KICKER_POS.y}%` }}
+      >
+        {kickerEmoji}
       </div>
 
       <div
