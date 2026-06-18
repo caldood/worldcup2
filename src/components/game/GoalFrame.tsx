@@ -8,80 +8,137 @@ interface GoalFrameProps {
   keeperLean?: Side | null;
 }
 
-// Drawn from flat polygons/shapes rather than an emoji so the keeper reads as a real
-// goalkeeper: yellow/black kit, gloves, and a wide ready-to-block stance facing the camera.
+// Drawn from shaded shapes rather than an emoji so the keeper reads as a real goalkeeper: a
+// gradient yellow/black kit, padded gloves, socks and boots, and a wide ready-to-block stance.
 function GoalkeeperSprite({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 100 130" className={className} aria-hidden="true">
-      {/* legs, wide ready stance */}
-      <polygon points="46,70 40,128 30,128 38,70" fill="#1e293b" />
-      <polygon points="54,70 60,128 70,128 62,70" fill="#1e293b" />
-      {/* boots */}
-      <polygon points="26,122 40,122 40,130 24,130" fill="#0f172a" />
-      <polygon points="60,122 74,122 76,130 60,130" fill="#0f172a" />
+      <defs>
+        <linearGradient id="gk-shirt" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#fde047" />
+          <stop offset="100%" stopColor="#e0a90b" />
+        </linearGradient>
+        <linearGradient id="gk-skin" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#e8b58d" />
+          <stop offset="100%" stopColor="#cd9264" />
+        </linearGradient>
+      </defs>
+
+      {/* arms raised wide (behind the torso) with dark cuffs */}
+      <line x1="35" y1="42" x2="14" y2="15" stroke="url(#gk-shirt)" strokeWidth="13" strokeLinecap="round" />
+      <line x1="65" y1="42" x2="86" y2="15" stroke="url(#gk-shirt)" strokeWidth="13" strokeLinecap="round" />
+      <circle cx="15" cy="16" r="6.5" fill="#1f2937" />
+      <circle cx="85" cy="16" r="6.5" fill="#1f2937" />
+      {/* padded gloves with a wrist cuff and palm crease */}
+      <rect x="5" y="3" width="17" height="18" rx="6.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+      <path d="M9 13 h9" stroke="#cbd5e1" strokeWidth="1" />
+      <rect x="7" y="16" width="13" height="5" rx="2" fill="#facc15" />
+      <rect x="78" y="3" width="17" height="18" rx="6.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+      <path d="M82 13 h9" stroke="#cbd5e1" strokeWidth="1" />
+      <rect x="80" y="16" width="13" height="5" rx="2" fill="#facc15" />
+
+      {/* socks with a coloured turnover + layered boots */}
+      <rect x="31" y="84" width="12" height="30" rx="5" fill="#111827" />
+      <rect x="57" y="84" width="12" height="30" rx="5" fill="#111827" />
+      <rect x="31" y="84" width="12" height="5" rx="2" fill="#facc15" />
+      <rect x="57" y="84" width="12" height="5" rx="2" fill="#facc15" />
+      <rect x="26" y="111" width="21" height="10" rx="4" fill="#0b1220" />
+      <rect x="54" y="111" width="21" height="10" rx="4" fill="#0b1220" />
+      <rect x="26" y="118" width="21" height="3.5" rx="1.5" fill="#020617" />
+      <rect x="54" y="118" width="21" height="3.5" rx="1.5" fill="#020617" />
+
       {/* shorts */}
-      <rect x="36" y="64" width="28" height="18" rx="3" fill="#0f172a" />
-      {/* jersey */}
-      <polygon points="30,26 70,26 66,68 34,68" fill="#facc15" stroke="#854d0e" strokeWidth="2" />
-      <rect x="46" y="26" width="8" height="42" fill="#854d0e" opacity="0.5" />
-      {/* arms raised wide, ready to block */}
-      <line x1="32" y1="32" x2="8" y2="6" stroke="#facc15" strokeWidth="13" strokeLinecap="round" />
-      <line x1="68" y1="32" x2="92" y2="6" stroke="#facc15" strokeWidth="13" strokeLinecap="round" />
-      {/* gloves */}
-      <circle cx="7" cy="5" r="9" fill="#f8fafc" stroke="#854d0e" strokeWidth="2" />
-      <circle cx="93" cy="5" r="9" fill="#f8fafc" stroke="#854d0e" strokeWidth="2" />
-      {/* neck + head */}
-      <rect x="44" y="20" width="12" height="8" fill="#d8a675" />
-      <circle cx="50" cy="14" r="13" fill="#d8a675" stroke="#7c4a25" strokeWidth="1.5" />
-      <path d="M37 9 a13 13 0 0 1 26 0 z" fill="#2d1b0e" />
+      <rect x="33" y="66" width="34" height="22" rx="6" fill="#0b1220" />
+      <rect x="33" y="66" width="34" height="4" rx="2" fill="#1f2937" />
+
+      {/* jersey with volume shading, collar and a number */}
+      <rect x="31" y="34" width="38" height="34" rx="9" fill="url(#gk-shirt)" stroke="#a16207" strokeWidth="1.5" />
+      <rect x="33" y="36" width="10" height="30" rx="5" fill="#ffffff" opacity="0.14" />
+      <rect x="57" y="36" width="11" height="30" rx="5" fill="#000000" opacity="0.1" />
+      <path d="M42 35 Q50 41 58 35 L58 33 Q50 39 42 33 Z" fill="#1f2937" />
+      <text x="50" y="58" textAnchor="middle" fontSize="15" fontWeight="700" fill="#a16207" fontFamily="Arial, sans-serif">
+        1
+      </text>
+
+      {/* neck + head + hair */}
+      <rect x="45" y="28" width="10" height="8" fill="url(#gk-skin)" />
+      <circle cx="50" cy="18" r="12" fill="url(#gk-skin)" stroke="#b07d4f" strokeWidth="1" />
+      <path d="M38.5 18 a11.5 11.5 0 0 1 23 0 q-11.5 -7 -23 0 z" fill="#3b2412" />
     </svg>
   );
 }
 
-// Clean white-and-navy USA kit built from rounded rects rather than sharp polygons, so it reads
-// as a tidy player rather than a jagged paper cutout. At rest both legs stand straight and apart
-// (no crossing); on the shot the kicking leg swings forward into the ball.
+// Shaded white-and-navy USA kit: gradient shirt with a shoulder yoke and number, navy shorts with
+// red trim, socks with a red turnover and proper boots. At rest both legs stand straight and apart;
+// on the shot the kicking leg swings forward into the ball (the two rotating groups are preserved).
 function KickerSprite({ className, kicking }: { className?: string; kicking?: boolean }) {
   return (
     <svg viewBox="0 0 100 130" className={className} aria-hidden="true">
-      {/* planted leg, straight at rest, leans back slightly to brace as the other leg swings */}
-      <g
-        transform={`rotate(${kicking ? -14 : -2} 38 70)`}
-        style={{ transition: 'transform 0.18s ease-out' }}
-      >
-        <rect x="31" y="68" width="14" height="46" rx="6" fill="#f8fafc" stroke="#1d4ed8" strokeWidth="1.5" />
-        <rect x="27" y="108" width="21" height="10" rx="3" fill="#1e293b" />
+      <defs>
+        <linearGradient id="kk-shirt" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#dbe2ea" />
+        </linearGradient>
+        <linearGradient id="kk-shorts" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#274aa0" />
+          <stop offset="100%" stopColor="#16235c" />
+        </linearGradient>
+        <linearGradient id="kk-sock" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#cfd8e3" />
+        </linearGradient>
+        <linearGradient id="kk-skin" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#e8b58d" />
+          <stop offset="100%" stopColor="#cd9264" />
+        </linearGradient>
+      </defs>
+
+      {/* planted leg, straight at rest, braces back slightly as the other leg swings */}
+      <g transform={`rotate(${kicking ? -14 : -2} 38 70)`} style={{ transition: 'transform 0.18s ease-out' }}>
+        <rect x="31" y="66" width="14" height="48" rx="7" fill="url(#kk-sock)" stroke="#1d4ed8" strokeWidth="1.5" />
+        <rect x="31" y="99" width="14" height="4.5" fill="#dc2626" />
+        <rect x="27" y="106" width="21" height="11" rx="4" fill="#111827" />
+        <rect x="27" y="113" width="21" height="4" rx="2" fill="#020617" />
       </g>
 
       {/* kicking leg, straight at rest, swings forward into the ball on the shot */}
-      <g
-        transform={`rotate(${kicking ? 62 : 2} 58 70)`}
-        style={{ transition: 'transform 0.18s ease-out' }}
-      >
-        <rect x="51" y="68" width="14" height="46" rx="6" fill="#f8fafc" stroke="#1d4ed8" strokeWidth="1.5" />
-        <rect x="47" y="108" width="21" height="10" rx="3" fill="#1e293b" />
+      <g transform={`rotate(${kicking ? 62 : 2} 58 70)`} style={{ transition: 'transform 0.18s ease-out' }}>
+        <rect x="51" y="66" width="14" height="48" rx="7" fill="url(#kk-sock)" stroke="#1d4ed8" strokeWidth="1.5" />
+        <rect x="51" y="99" width="14" height="4.5" fill="#dc2626" />
+        <rect x="47" y="106" width="21" height="11" rx="4" fill="#111827" />
+        <rect x="47" y="113" width="21" height="4" rx="2" fill="#020617" />
       </g>
 
-      {/* shorts, navy with red side stripes */}
-      <rect x="34" y="60" width="32" height="20" rx="7" fill="#1e3a8a" />
-      <rect x="34" y="60" width="4" height="20" fill="#b91c1c" />
-      <rect x="62" y="60" width="4" height="20" fill="#b91c1c" />
+      {/* jersey with a navy shoulder yoke, volume shading and a number (hem tucks into the shorts) */}
+      <rect x="32" y="23" width="36" height="40" rx="9" fill="url(#kk-shirt)" stroke="#cbd5e1" strokeWidth="1" />
+      <path d="M32 30 Q50 19 68 30 L68 24 Q50 15 32 24 Z" fill="#1e3a8a" />
+      <rect x="34" y="31" width="9" height="29" rx="4" fill="#ffffff" opacity="0.55" />
+      <rect x="58" y="31" width="9" height="29" rx="4" fill="#0b1f4d" opacity="0.07" />
+      <text x="50" y="52" textAnchor="middle" fontSize="15" fontWeight="700" fill="#1e3a8a" fontFamily="Arial, sans-serif">
+        9
+      </text>
 
-      {/* jersey, clean white shirt with a navy yoke and a red hem stripe */}
-      <rect x="32" y="24" width="36" height="38" rx="9" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
-      <path d="M32 29 Q50 19 68 29 L68 24.5 Q50 15 32 24.5 Z" fill="#1e3a8a" />
-      <rect x="32" y="55" width="36" height="5" rx="2" fill="#b91c1c" />
+      {/* shorts over the jersey hem, navy with red side stripes and a centre seam */}
+      <rect x="33" y="58" width="34" height="22" rx="8" fill="url(#kk-shorts)" />
+      <rect x="33" y="58" width="34" height="4" rx="2" fill="#2f57b8" />
+      <rect x="33" y="58" width="4" height="22" fill="#dc2626" />
+      <rect x="63" y="58" width="4" height="22" fill="#dc2626" />
+      <rect x="49.2" y="62" width="1.6" height="18" fill="#0b1f4d" opacity="0.4" />
 
-      {/* arms, bent out for balance */}
-      <line x1="35" y1="32" x2="15" y2="46" stroke="#f8fafc" strokeWidth="11" strokeLinecap="round" />
-      <line x1="65" y1="30" x2="85" y2="16" stroke="#f8fafc" strokeWidth="11" strokeLinecap="round" />
-      <circle cx="14" cy="48" r="6" fill="#d8a675" />
-      <circle cx="86" cy="14" r="6" fill="#d8a675" />
+      {/* arms: white sleeve + skin forearm + hand, with a red cuff; right arm up for balance */}
+      <line x1="35" y1="32" x2="22" y2="44" stroke="url(#kk-shirt)" strokeWidth="10" strokeLinecap="round" />
+      <line x1="23" y1="43" x2="15" y2="51" stroke="url(#kk-skin)" strokeWidth="7" strokeLinecap="round" />
+      <circle cx="14" cy="52" r="4.5" fill="url(#kk-skin)" />
+      <line x1="65" y1="31" x2="79" y2="22" stroke="url(#kk-shirt)" strokeWidth="10" strokeLinecap="round" />
+      <line x1="78" y1="23" x2="86" y2="15" stroke="url(#kk-skin)" strokeWidth="7" strokeLinecap="round" />
+      <circle cx="87" cy="14" r="4.5" fill="url(#kk-skin)" />
+      <circle cx="23" cy="43" r="2.4" fill="#dc2626" />
+      <circle cx="78" cy="23" r="2.4" fill="#dc2626" />
 
-      {/* neck + head */}
-      <rect x="45" y="19" width="10" height="7" fill="#d8a675" />
-      <circle cx="50" cy="13" r="11" fill="#d8a675" stroke="#7c4a25" strokeWidth="1.5" />
-      <path d="M39 8 a11 11 0 0 1 22 0 z" fill="#1f2937" />
+      {/* neck + head + hair */}
+      <rect x="45" y="19" width="10" height="7" fill="url(#kk-skin)" />
+      <circle cx="50" cy="13" r="11" fill="url(#kk-skin)" stroke="#b07d4f" strokeWidth="1" />
+      <path d="M39 13 a11 11 0 0 1 22 0 q-11 -6.5 -22 0 z" fill="#4a3220" />
     </svg>
   );
 }
