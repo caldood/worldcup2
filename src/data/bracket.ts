@@ -52,7 +52,7 @@ export const BRACKET: BracketRound[] = [
       name: 'Brazil Red Card Risk',
       emoji: '🇧🇷',
       color: '#facc15',
-      requiredGoals: 4,
+      requiredGoals: 3,
       speedMultiplier: 1.55,
     },
     unlockReward: 'final',

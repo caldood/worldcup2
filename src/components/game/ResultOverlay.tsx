@@ -11,9 +11,16 @@ const RESULT_COPY: Record<ShotOutcome['result'], { title: string; emoji: string;
   miss: { title: 'MISS', emoji: '❌', color: 'text-rose-400' },
 };
 
+// A miss reads differently depending on how it died — a keeper save, over the bar, or flashed wide.
+function missCopy(outcome: ShotOutcome): { title: string; emoji: string; color: string } {
+  if (outcome.saved) return { title: 'SAVED!', emoji: '🧤', color: 'text-rose-300' };
+  if (outcome.overBar) return { title: 'OVER THE BAR!', emoji: '🚀', color: 'text-rose-400' };
+  return { title: 'WIDE!', emoji: '❌', color: 'text-rose-400' };
+}
+
 export function ResultOverlay({ outcome }: ResultOverlayProps) {
-  const copy = RESULT_COPY[outcome.result];
   const isGoal = outcome.result !== 'miss';
+  const copy = isGoal ? RESULT_COPY[outcome.result] : missCopy(outcome);
   const showBullMarket = isGoal && outcome.multiplier > 1;
 
   return (

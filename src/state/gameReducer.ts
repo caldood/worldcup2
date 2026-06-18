@@ -1,8 +1,8 @@
 import { BRACKET } from '../data/bracket';
 import { COSMETICS, DEFAULT_COSMETICS } from '../data/cosmetics';
 import { evaluateAchievements } from '../data/achievements';
-import { BASE_PAYOUTS, computeShotResult, getStreakMultiplier } from '../utils/shotLogic';
-import type { GameState, ShotOutcome } from '../types';
+import { BASE_PAYOUTS, computeShot, getStreakMultiplier } from '../utils/shotLogic';
+import type { GameState, ShotOutcome, Side } from '../types';
 
 export const STORAGE_KEY = 'goal-trader-save-v1';
 
@@ -33,7 +33,7 @@ export const initialState: GameState = {
 };
 
 export type GameAction =
-  | { type: 'TAKE_SHOT'; power: number; accuracy: number }
+  | { type: 'TAKE_SHOT'; power: number; accuracy: number; keeperSide: Side }
   | { type: 'COMPLETE_MATCH'; won: boolean }
   | { type: 'SELECT_COSMETIC'; category: keyof GameState['selectedCosmetics']; id: string }
   | { type: 'TOGGLE_SOUND' }
@@ -65,20 +65,20 @@ export function saveState(state: GameState) {
 }
 
 /** Computes a single shot's result without mutating state; used by the reducer and the UI. */
-export function resolveShot(state: GameState, power: number, accuracy: number): ShotOutcome {
-  const result = computeShotResult(power, accuracy);
+export function resolveShot(state: GameState, power: number, accuracy: number, keeperSide: Side): ShotOutcome {
+  const { result, placement, saved, overBar, beatKeeper } = computeShot(power, accuracy, keeperSide);
   const isGoal = result !== 'miss';
   const streakAfterShot = isGoal ? state.currentStreak + 1 : 0;
   const multiplier = isGoal ? getStreakMultiplier(streakAfterShot) : 1;
   const basePayout = BASE_PAYOUTS[result];
   const payout = Math.round(basePayout * multiplier);
-  return { result, basePayout, multiplier, payout, power, accuracy };
+  return { result, basePayout, multiplier, payout, power, accuracy, keeperSide, placement, saved, overBar, beatKeeper };
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'TAKE_SHOT': {
-      const outcome = resolveShot(state, action.power, action.accuracy);
+      const outcome = resolveShot(state, action.power, action.accuracy, action.keeperSide);
       const isGoal = outcome.result !== 'miss';
       const newStreak = isGoal ? state.currentStreak + 1 : 0;
       const stats = {

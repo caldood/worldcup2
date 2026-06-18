@@ -1,5 +1,8 @@
 export type ShotResult = 'topCorner' | 'great' | 'goal' | 'miss';
 
+/** Which third of the goal a dive/placement targets. */
+export type Side = 'left' | 'center' | 'right';
+
 export interface Opponent {
   id: string;
   name: string;
@@ -76,4 +79,14 @@ export interface ShotOutcome {
   payout: number;
   power: number;
   accuracy: number;
+  /** Side the keeper committed to diving. */
+  keeperSide: Side;
+  /** Side of the goal the player's shot was placed toward. */
+  placement: Side;
+  /** Miss caused specifically by the keeper getting a hand to it (vs. wide/over). */
+  saved: boolean;
+  /** Miss caused by sailing over the bar (too much power). */
+  overBar: boolean;
+  /** Scored despite the keeper guessing the right side (an unstoppable corner). */
+  beatKeeper: boolean;
 }

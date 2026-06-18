@@ -1,9 +1,11 @@
 import { useEffect, useState, type ReactElement } from 'react';
-import type { ShotOutcome } from '../../types';
+import type { ShotOutcome, Side } from '../../types';
 
 interface GoalFrameProps {
   outcome: ShotOutcome | null;
   ballEmoji: string;
+  /** Side the keeper is leaning toward while the player aims (the readable "tell"). */
+  keeperLean?: Side | null;
 }
 
 // Drawn from flat polygons/shapes rather than an emoji so the keeper reads as a real
@@ -205,30 +207,36 @@ const GOAL_LINE = 46;
 // sells the penalty-kick distance.
 const GRASS_TOP = 84;
 
+// Horizontal goal-mouth position (percent) the ball heads toward, by which side it was placed.
+const SIDE_X: Record<Side, number> = { left: 28, center: 50, right: 72 };
+// Corners are pushed harder toward the posts for the higher tiers so they read as real corners.
+const CORNER_X: Record<Side, number> = { left: 19, center: 50, right: 81 };
+
 function markerPosition(outcome: ShotOutcome): { x: number; y: number } {
-  const { result, accuracy, power } = outcome;
+  const { result, placement, saved, overBar, power } = outcome;
+
   if (result === 'miss') {
-    if (power > 97) return { x: 50, y: -22 };
-    if (power < 15) return { x: 50, y: 68 };
-    return { x: accuracy < 50 ? -14 : 114, y: 26 };
+    if (overBar) return { x: 50, y: -24 }; // sailed over the bar
+    if (saved && power <= 22) return { x: SIDE_X[placement], y: 52 }; // weak roller smothered low
+    if (saved) return { x: SIDE_X[placement], y: 27 }; // keeper got a hand to it at the dive
+    return { x: placement === 'left' ? -12 : placement === 'right' ? 112 : 50, y: 24 }; // flashed wide
   }
-  const x = Math.min(88, Math.max(12, accuracy));
-  const y = result === 'topCorner' ? 9 : result === 'great' ? 18 : 33;
-  return { x, y };
+
+  if (result === 'topCorner') return { x: CORNER_X[placement], y: 9 };
+  if (result === 'great') return { x: CORNER_X[placement], y: 16 };
+  return { x: SIDE_X[placement], y: 27 }; // plain goal
 }
 
-// Keeper dives toward the ball's side; top corners and wide misses beat them clean.
-function keeperDive(outcome: ShotOutcome): { x: number; rotate: number; jump: boolean } {
-  const { result, accuracy } = outcome;
-  if (result === 'topCorner') return { x: (accuracy - 50) * 1.1, rotate: 0, jump: true };
-  if (result === 'miss' && (accuracy <= 20 || accuracy >= 80)) return { x: 0, rotate: 0, jump: false };
-  const dir = accuracy < 50 ? -1 : 1;
-  return { x: dir * 85, rotate: dir * 80, jump: false };
+// Keeper dives to the side it committed to (independent of the ball — that's the whole point now).
+function keeperDive(side: Side): { x: number; rotate: number; jump: boolean } {
+  if (side === 'left') return { x: -82, rotate: -78, jump: false };
+  if (side === 'right') return { x: 82, rotate: 78, jump: false };
+  return { x: 0, rotate: 0, jump: true }; // springs up to guard the middle
 }
 
 type Phase = 'idle' | 'flying' | 'impact';
 
-export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
+export function GoalFrame({ outcome, ballEmoji, keeperLean }: GoalFrameProps) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [trackedOutcome, setTrackedOutcome] = useState(outcome);
 
@@ -251,9 +259,15 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
   const target = outcome ? markerPosition(outcome) : null;
   const flying = phase === 'flying' || phase === 'impact';
   const ballPos = flying && target ? target : BALL_START;
-  const dive = outcome ? keeperDive(outcome) : null;
+  const dive = outcome ? keeperDive(outcome.keeperSide) : null;
+  // Pre-shot "tell": the keeper shifts and tilts toward the side it will guard so a sharp player can
+  // read it and aim the other way. A centred commit just stands tall in the middle.
+  const leanX = keeperLean === 'left' ? -22 : keeperLean === 'right' ? 22 : 0;
+  const leanRotate = keeperLean === 'left' ? -8 : keeperLean === 'right' ? 8 : 0;
   const isGoalImpact = phase === 'impact' && outcome && outcome.result !== 'miss';
   const isWhiffImpact = phase === 'impact' && outcome && outcome.result === 'miss';
+  // A save is its own beat — the keeper meets the ball rather than the ball flying clean past.
+  const isSaveImpact = phase === 'impact' && outcome && outcome.saved;
   // Ball closer to the grass casts a bigger, darker shadow than one high in the air.
   const groundedness = Math.max(0.3, Math.min(1, ballPos.y / GRASS_TOP));
 
@@ -355,9 +369,10 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
         style={{
           left: `${KEEPER_POS.x}%`,
           top: `${KEEPER_POS.y}%`,
-          transform: dive
-            ? `translate(-50%, -50%) translateX(${flying ? dive.x : 0}px) translateY(${flying && dive.jump ? -26 : 0}px) rotate(${flying ? dive.rotate : 0}deg)`
-            : 'translate(-50%, -50%)',
+          transform:
+            flying && dive
+              ? `translate(-50%, -50%) translateX(${dive.x}px) translateY(${dive.jump ? -26 : 0}px) rotate(${dive.rotate}deg)`
+              : `translate(-50%, -50%) translateX(${leanX}px) rotate(${leanRotate}deg)`,
           transition: 'transform 0.42s cubic-bezier(.33,.9,.4,1)',
           transitionDelay: flying ? '70ms' : '0ms',
         }}
@@ -397,7 +412,17 @@ export function GoalFrame({ outcome, ballEmoji }: GoalFrameProps) {
         {ballEmoji}
       </div>
 
-      {isWhiffImpact && (
+      {isSaveImpact && (
+        <div
+          key={`${outcome.power}-${outcome.accuracy}-save`}
+          className="animate-pop-in absolute -translate-x-1/2 -translate-y-1/2 text-2xl drop-shadow"
+          style={{ left: `${target!.x}%`, top: `${target!.y}%` }}
+        >
+          🧤
+        </div>
+      )}
+
+      {isWhiffImpact && !isSaveImpact && (
         <div
           key={`${outcome.power}-${outcome.accuracy}-whiff`}
           className="absolute -translate-x-1/2 -translate-y-1/2 text-xl animate-float-up"

@@ -9,18 +9,38 @@ import { GoalFrame } from '../game/GoalFrame';
 import { ResultOverlay } from '../game/ResultOverlay';
 import { Button } from '../ui/Button';
 import { sfx } from '../../utils/sound';
-import type { ShotOutcome, ShotResult } from '../../types';
+import { placementSide, keeperReadChance } from '../../utils/shotLogic';
+import type { ShotOutcome, ShotResult, Side } from '../../types';
 
-// Bands mirror the |accuracy-50| thresholds in computeShotResult: <=5 top corner, <=15 great, <=32 goal.
+const SIDES: Side[] = ['left', 'center', 'right'];
+const randomSide = (): Side => SIDES[Math.floor(Math.random() * SIDES.length)];
+
+/** Short status line under the meters reacting to how the shot resolved. */
+function resultPrompt(outcome: ShotOutcome): string {
+  if (outcome.result === 'topCorner') return outcome.beatKeeper ? 'Unstoppable! 🎯' : 'Top corner! 🎯';
+  if (outcome.result === 'great') return 'Great strike!';
+  if (outcome.result === 'goal') return 'Goal!';
+  if (outcome.saved) return 'Keeper saves it! 🧤';
+  if (outcome.overBar) return 'Over the bar!';
+  return 'Flashed wide!';
+}
+
+// Aim bands: the two gold corners (≈22 / ≈78) are the high-value, hard-to-hit targets; the emerald
+// centre band is the safe medium option. Aim away from whichever side the keeper is leaning.
 const ACCURACY_ZONES: Zone[] = [
-  { left: 18, width: 17, className: 'bg-emerald-400/40' },
-  { left: 65, width: 17, className: 'bg-emerald-400/40' },
-  { left: 35, width: 10, className: 'bg-orange-400/50' },
-  { left: 55, width: 10, className: 'bg-orange-400/50' },
-  { left: 45, width: 10, className: 'bg-yellow-400/70' },
+  { left: 13, width: 18, className: 'bg-amber-400/55' },
+  { left: 40, width: 20, className: 'bg-emerald-400/40' },
+  { left: 69, width: 18, className: 'bg-amber-400/55' },
 ];
 
-const POWER_ZONES: Zone[] = [{ left: 15, width: 82, className: 'bg-emerald-400/35' }];
+// Power bands: weak roller (left, red) → controlled (green) → driven/keeper-beating (gold) → over the
+// bar (right, red). Land it in the gold to keep every option open.
+const POWER_ZONES: Zone[] = [
+  { left: 0, width: 22, className: 'bg-rose-500/40' },
+  { left: 22, width: 38, className: 'bg-emerald-400/30' },
+  { left: 60, width: 30, className: 'bg-amber-400/55' },
+  { left: 90, width: 10, className: 'bg-rose-500/45' },
+];
 
 // Matches the flight-to-impact timing in GoalFrame so the sfx/overlay land with the ball.
 const IMPACT_DELAY = 460;
@@ -58,6 +78,8 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
   const [outcome, setOutcome] = useState<ShotOutcome | null>(null);
   const [matchWon, setMatchWon] = useState<boolean | null>(null);
   const [showOverlay, setShowOverlay] = useState(false);
+  // The side the keeper commits to (shown as a lean while aiming); decided when the power is locked.
+  const [keeperLean, setKeeperLean] = useState<Side | null>(null);
 
   const powerGetter = useRef<() => number>(() => 0);
   const accuracyGetter = useRef<() => number>(() => 0);
@@ -69,6 +91,7 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
     setLockedPower(null);
     setOutcome(null);
     setShowOverlay(false);
+    setKeeperLean(null);
     setPhase('power');
   }, []);
 
@@ -81,14 +104,22 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
       const power = powerGetter.current();
       setLockedPower(power);
       play(sfx.lock);
+      // Keeper commits now and telegraphs it with a lean, giving the player something to read.
+      setKeeperLean(randomSide());
       setPhase('accuracy');
       return;
     }
     if (phase === 'accuracy' && lockedPower !== null) {
       const accuracy = accuracyGetter.current();
-      const computed = resolveShot(state, lockedPower, accuracy);
+      // Tougher keepers can "read" the shot at the last instant and dive onto the placed side,
+      // overriding their early lean; easy keepers always honour their tell.
+      const committed = keeperLean ?? randomSide();
+      const reads = Math.random() < keeperReadChance(round.opponent.speedMultiplier);
+      const keeperSide: Side = reads ? placementSide(accuracy) : committed;
+
+      const computed = resolveShot(state, lockedPower, accuracy, keeperSide);
       setOutcome(computed);
-      dispatch({ type: 'TAKE_SHOT', power: lockedPower, accuracy });
+      dispatch({ type: 'TAKE_SHOT', power: lockedPower, accuracy, keeperSide });
 
       const isGoal = computed.result !== 'miss';
       const newGoals = goalsThisMatch + (isGoal ? 1 : 0);
@@ -120,7 +151,18 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
         }
       }, 1400);
     }
-  }, [phase, lockedPower, state, dispatch, goalsThisMatch, shotIndex, round.opponent.requiredGoals, resetForNextShot]);
+  }, [
+    phase,
+    lockedPower,
+    keeperLean,
+    state,
+    dispatch,
+    goalsThisMatch,
+    shotIndex,
+    round.opponent.requiredGoals,
+    round.opponent.speedMultiplier,
+    resetForNextShot,
+  ]);
 
   const handleRetry = () => {
     setShotIndex(0);
@@ -178,14 +220,14 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
 
       <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6">
         <div key={shotMissed ? `miss-${shotIndex}` : 'frame'} className={`w-full ${shotMissed ? 'animate-shake' : ''}`}>
-          <GoalFrame outcome={outcome} ballEmoji={ballEmoji} />
+          <GoalFrame outcome={outcome} ballEmoji={ballEmoji} keeperLean={phase === 'accuracy' ? keeperLean : null} />
         </div>
 
         <div className="w-full max-w-sm space-y-3">
           <div className="text-center text-xs font-bold uppercase tracking-widest text-white/70">
             {phase === 'power' && 'Tap to set POWER'}
-            {phase === 'accuracy' && 'Tap to set AIM'}
-            {phase === 'result' && (outcome?.result !== 'miss' ? 'Nice strike!' : 'Better luck next shot')}
+            {phase === 'accuracy' && '⚠ Aim away from the keeper'}
+            {phase === 'result' && outcome && resultPrompt(outcome)}
             {phase === 'matchEnd' && ' '}
           </div>
           <MeterBar

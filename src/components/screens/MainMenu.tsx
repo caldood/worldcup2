@@ -83,8 +83,8 @@ export function MainMenu({ onPlay }: MainMenuProps) {
       </div>
 
       <p className="max-w-xs text-xs text-emerald-100/70">
-        Tap once to set your power, tap again to aim. Score Goals, Great Goals, and Top Corners to grow your portfolio
-        through the World Cup knockout bracket.
+        Tap to set power, then aim away from the keeper's lean. Land it in the corner with pace for a Top Corner —
+        bank the payouts through the World Cup knockout bracket.
       </p>
     </div>
   );
