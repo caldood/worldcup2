@@ -131,6 +131,7 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
   };
 
   const isPlayable = phase === 'power' || phase === 'accuracy';
+  const shotMissed = phase === 'result' && showOverlay && outcome?.result === 'miss';
 
   return (
     <div className={`relative flex h-full flex-col bg-gradient-to-b ${stadium?.preview ?? 'from-emerald-700 to-emerald-900'}`}>
@@ -157,18 +158,28 @@ export function MatchScreen({ roundIndex, onExit }: MatchScreenProps) {
       </div>
 
       <div className="flex justify-center gap-2 pb-2">
-        {Array.from({ length: SHOTS_PER_MATCH }).map((_, i) => (
-          <div
-            key={i}
-            className={`h-3 w-3 rounded-full border border-white/40 transition-shadow ${
-              shotHistory[i] ? `${RESULT_DOT[shotHistory[i]]} shadow-[0_0_6px_rgba(255,255,255,0.5)]` : 'bg-white/10'
-            }`}
-          />
-        ))}
+        {Array.from({ length: SHOTS_PER_MATCH }).map((_, i) => {
+          const result = shotHistory[i];
+          const isNext = !result && i === shotHistory.length && isPlayable;
+          return (
+            <div
+              key={i}
+              className={`h-3 w-3 rounded-full border transition-all ${
+                result
+                  ? `${RESULT_DOT[result]} border-white/50 shadow-[0_0_6px_rgba(255,255,255,0.5)]`
+                  : isNext
+                    ? 'animate-pulse border-white/80 bg-white/30'
+                    : 'border-white/40 bg-white/10'
+              }`}
+            />
+          );
+        })}
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6">
-        <GoalFrame outcome={outcome} ballEmoji={ballEmoji} />
+        <div key={shotMissed ? `miss-${shotIndex}` : 'frame'} className={`w-full ${shotMissed ? 'animate-shake' : ''}`}>
+          <GoalFrame outcome={outcome} ballEmoji={ballEmoji} />
+        </div>
 
         <div className="w-full max-w-sm space-y-3">
           <div className="text-center text-xs font-bold uppercase tracking-widest text-white/70">

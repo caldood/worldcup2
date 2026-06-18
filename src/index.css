@@ -110,3 +110,27 @@ body {
 .animate-value-pop {
   animation: value-pop 0.45s ease-out;
 }
+
+@keyframes float-bob {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-10px) rotate(4deg); }
+}
+.animate-float-bob {
+  animation: float-bob 3.2s ease-in-out infinite;
+}
+
+@keyframes spotlight-drift {
+  0%, 100% { transform: translateX(-4%) scale(1); opacity: 0.55; }
+  50% { transform: translateX(4%) scale(1.06); opacity: 0.75; }
+}
+.animate-spotlight-drift {
+  animation: spotlight-drift 6s ease-in-out infinite;
+}
+
+@keyframes sheen-sweep {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  100% { transform: translateX(220%) skewX(-18deg); }
+}
+.animate-sheen-sweep {
+  animation: sheen-sweep 2.4s ease-in-out infinite;
+}

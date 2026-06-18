@@ -51,12 +51,27 @@ export function LockerScreen({ onBack }: LockerScreenProps) {
                     key={cosmetic.id}
                     disabled={!unlocked}
                     onClick={() => dispatch({ type: 'SELECT_COSMETIC', category, id: cosmetic.id })}
-                    className={`flex flex-col items-center gap-1 rounded-2xl bg-gradient-to-br p-3 shadow-md shadow-black/30 ${cosmetic.preview} ${
-                      selected ? 'ring-3 ring-white shadow-[0_0_12px_rgba(255,255,255,0.5)]' : 'ring-1 ring-white/20'
-                    } ${unlocked ? '' : 'opacity-35'}`}
+                    className={`relative flex flex-col items-center gap-1 overflow-hidden rounded-2xl bg-gradient-to-br p-3 shadow-md shadow-black/30 transition-transform ${cosmetic.preview} ${
+                      selected
+                        ? 'ring-3 ring-white shadow-[0_0_12px_rgba(255,255,255,0.5)]'
+                        : unlocked
+                          ? 'ring-1 ring-white/20 active:scale-95'
+                          : 'ring-1 ring-white/10'
+                    }`}
                   >
-                    <div className="text-3xl drop-shadow">{unlocked ? cosmetic.emoji : '🔒'}</div>
-                    <div className="text-xs font-bold text-white drop-shadow">{cosmetic.name}</div>
+                    {/* darken locked tiles with a scrim instead of washing out the whole swatch */}
+                    {!unlocked && <div className="absolute inset-0 bg-black/55" aria-hidden="true" />}
+                    <div className={`relative text-3xl drop-shadow ${unlocked ? '' : 'opacity-90'}`}>
+                      {unlocked ? cosmetic.emoji : '🔒'}
+                    </div>
+                    <div className={`relative text-xs font-bold drop-shadow ${unlocked ? 'text-white' : 'text-white/70'}`}>
+                      {cosmetic.name}
+                    </div>
+                    {selected && (
+                      <div className="relative -mb-0.5 rounded-full bg-white/90 px-2 text-[10px] font-bold uppercase tracking-wide text-emerald-900">
+                        Equipped
+                      </div>
+                    )}
                   </button>
                 );
               })}

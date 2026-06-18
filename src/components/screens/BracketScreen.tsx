@@ -32,19 +32,37 @@ export function BracketScreen({ onPlayRound, onNavigate }: BracketScreenProps) {
                 key={round.id}
                 className={`flex items-center justify-between rounded-2xl border p-4 shadow-md shadow-black/20 ${
                   locked
-                    ? 'border-white/10 bg-white/5 opacity-50'
+                    ? 'border-white/10 bg-white/[0.04]'
                     : isCurrent
                       ? 'border-amber-300/60 bg-gradient-to-r from-amber-400/15 to-amber-300/5 animate-pulse-glow'
                       : 'border-emerald-400/40 bg-gradient-to-r from-emerald-400/15 to-emerald-400/5'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/20 text-2xl ring-1 ring-white/10">
-                    {won ? '✅' : locked ? '🔒' : round.opponent.emoji}
+                  <div
+                    className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/20 text-2xl ring-1 ring-white/10 ${
+                      locked ? 'opacity-50' : ''
+                    }`}
+                  >
+                    {/* always show the opponent's flag; mark its lock/clear state with a corner badge */}
+                    {round.opponent.emoji}
+                    {won && (
+                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-950 text-[11px] ring-1 ring-white/15">
+                        ✅
+                      </span>
+                    )}
+                    {locked && (
+                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-950 text-[10px] ring-1 ring-white/15">
+                        🔒
+                      </span>
+                    )}
                   </div>
-                  <div>
+                  <div className={locked ? 'opacity-60' : ''}>
                     <div className="text-xs font-semibold uppercase tracking-wider text-white/60">{round.name}</div>
                     <div className="font-bold text-white">{round.opponent.name}</div>
+                    <div className="mt-0.5 text-[11px] font-medium text-emerald-200/70">
+                      ⚽ {round.opponent.requiredGoals}/5 to advance
+                    </div>
                   </div>
                 </div>
                 <Button
