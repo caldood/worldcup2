@@ -134,3 +134,13 @@ body {
 .animate-sheen-sweep {
   animation: sheen-sweep 2.4s ease-in-out infinite;
 }
+
+@keyframes crowd-cheer {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10%) scale(1.05); }
+}
+
+@keyframes crowd-sway {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4%) rotate(2deg); }
+}

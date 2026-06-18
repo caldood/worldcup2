@@ -161,13 +161,30 @@ const CROWD_PALETTE: { skin: string; hair: string; shirt: string }[] = [
   { skin: '#8d5a3c', hair: '#5c3a21', shirt: '#06b6d4' },
 ];
 
-// Deterministically lays out a grid of tiny "person" shapes (head + shoulders) standing in for a
-// packed crowd, sized to a given SVG viewBox. No randomness so renders are stable across re-paints.
-function crowdPeople(viewBoxWidth: number, viewBoxHeight: number, rows: number, cols: number) {
-  const people: ReactElement[] = [];
+// Deterministically lays out a grid of "person" shapes (head + shoulders, volume-shaded shirt)
+// standing in for a packed crowd, sized to a given SVG viewBox, with a faint banded seat-row
+// backdrop behind them for stadium texture. A seeded slice of fans throw their arms up and cheer,
+// and another slice sway gently in place, each on its own staggered timing — so the stands read as
+// alive rather than a static wallpaper. `seed` keeps two crowd bands from moving in lockstep.
+function crowdPeople(viewBoxWidth: number, viewBoxHeight: number, rows: number, cols: number, seed = 0) {
+  const shapes: ReactElement[] = [];
   const rowH = viewBoxHeight / rows;
   const colW = viewBoxWidth / cols;
-  const headR = Math.min(rowH, colW) * 0.32;
+  const headR = Math.min(rowH, colW) * 0.34;
+
+  for (let r = 0; r < rows; r++) {
+    shapes.push(
+      <rect
+        key={`row-${r}`}
+        x={0}
+        y={r * rowH}
+        width={viewBoxWidth}
+        height={rowH}
+        fill={r % 2 === 0 ? 'rgba(15,23,42,0.4)' : 'rgba(8,13,24,0.4)'}
+      />,
+    );
+  }
+
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const i = r * cols + c;
@@ -180,8 +197,52 @@ function crowdPeople(viewBoxWidth: number, viewBoxHeight: number, rows: number, 
       const cy = rowH * (r + 0.62);
       const shoulderW = headR * 2.3;
       const shoulderH = rowH * 0.46;
-      people.push(
-        <g key={`${r}-${c}`}>
+
+      const cheers = pseudoRandom(seed * 7.7 + i * 3.1) < 0.16;
+      const sways = !cheers && pseudoRandom(seed * 11.3 + i * 5.9) < 0.3;
+      const delay = pseudoRandom(seed * 4.1 + i * 1.7) * 2;
+      const motionStyle = cheers
+        ? {
+            animation: `crowd-cheer ${1.1 + (i % 3) * 0.15}s ease-in-out infinite`,
+            animationDelay: `${delay}s`,
+            transformBox: 'fill-box' as const,
+            transformOrigin: 'bottom center',
+          }
+        : sways
+          ? {
+              animation: `crowd-sway ${1.8 + (i % 4) * 0.2}s ease-in-out infinite`,
+              animationDelay: `${delay}s`,
+              transformBox: 'fill-box' as const,
+              transformOrigin: 'bottom center',
+            }
+          : undefined;
+
+      shapes.push(
+        <g key={`p-${r}-${c}`} style={motionStyle}>
+          {cheers && (
+            <>
+              <line
+                x1={cx - shoulderW * 0.4}
+                y1={cy - shoulderH * 0.1}
+                x2={cx - shoulderW * 0.95}
+                y2={cy - headR * 2.1}
+                stroke={palette.shirt}
+                strokeWidth={headR * 0.5}
+                strokeLinecap="round"
+              />
+              <line
+                x1={cx + shoulderW * 0.4}
+                y1={cy - shoulderH * 0.1}
+                x2={cx + shoulderW * 0.95}
+                y2={cy - headR * 2.1}
+                stroke={palette.shirt}
+                strokeWidth={headR * 0.5}
+                strokeLinecap="round"
+              />
+              <circle cx={cx - shoulderW * 0.95} cy={cy - headR * 2.1} r={headR * 0.3} fill={palette.skin} />
+              <circle cx={cx + shoulderW * 0.95} cy={cy - headR * 2.1} r={headR * 0.3} fill={palette.skin} />
+            </>
+          )}
           <rect
             x={cx - shoulderW / 2}
             y={cy - shoulderH * 0.15}
@@ -190,16 +251,27 @@ function crowdPeople(viewBoxWidth: number, viewBoxHeight: number, rows: number, 
             rx={shoulderH * 0.35}
             fill={palette.shirt}
           />
+          {/* light shoulder highlight gives the shirt a touch of volume instead of a flat fill */}
+          <rect
+            x={cx - shoulderW / 2}
+            y={cy - shoulderH * 0.15}
+            width={shoulderW}
+            height={shoulderH * 0.4}
+            rx={shoulderH * 0.3}
+            fill="#ffffff"
+            opacity={0.16}
+          />
           <circle cx={cx} cy={cy - headR * 1.05} r={headR} fill={palette.skin} />
           <path
             d={`M ${cx - headR} ${cy - headR * 1.05} a ${headR} ${headR} 0 0 1 ${headR * 2} 0 z`}
             fill={palette.hair}
           />
+          {cheers && <ellipse cx={cx} cy={cy - headR * 0.85} rx={headR * 0.22} ry={headR * 0.3} fill="#3f1d12" opacity={0.8} />}
         </g>,
       );
     }
   }
-  return people;
+  return shapes;
 }
 
 // Deterministic pseudo-random in [0, 1) from a numeric seed, so scattered flag positions stay
@@ -334,18 +406,18 @@ export function GoalFrame({ outcome, ballEmoji, keeperLean }: GoalFrameProps) {
       {/* upper stands: a purely additive extension above the existing goal scene, so the crowd
           reads as a full stadium bowl towering over the goal rather than a thin strip pinned to it.
           Nothing in the scene below is touched or repositioned. */}
-      <div className="relative aspect-[16/4] w-full overflow-hidden">
+      <div className="relative aspect-[16/5.5] w-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900" />
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 25" preserveAspectRatio="none" aria-hidden="true">
-          {crowdPeople(100, 25, 6, 17)}
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 34.375" preserveAspectRatio="none" aria-hidden="true">
+          {crowdPeople(100, 34.375, 9, 19, 1)}
         </svg>
         <div className="pointer-events-none absolute top-3 left-[10%] h-12 w-12 rounded-full bg-amber-100/40 blur-xl" />
         <div className="pointer-events-none absolute top-3 right-[10%] h-12 w-12 rounded-full bg-amber-100/40 blur-xl" />
         <div className="absolute inset-0">
-          {scatterFlags(10, 1, 100, 25, [1.5, 14.5], 11).map(({ flag, left, top, key }) => (
+          {scatterFlags(12, 1, 100, 34.375, [2, 19.9], 15).map(({ flag, left, top, key }) => (
             <span
               key={key}
-              className="absolute -translate-x-1/2 -translate-y-1/2 text-3xl leading-none drop-shadow-sm"
+              className="absolute -translate-x-1/2 -translate-y-1/2 text-4xl leading-none drop-shadow-sm"
               style={{ left: `${left}%`, top: `${top}%` }}
             >
               {flag}
@@ -363,14 +435,14 @@ export function GoalFrame({ outcome, ballEmoji, keeperLean }: GoalFrameProps) {
       >
       {/* crowd: dark stand structure, a tiled multicolor dot pattern standing in for packed fans,
           and a scatter of national flags waving above them */}
-      <div className="absolute inset-x-0 top-0 h-[11%] overflow-hidden">
+      <div className="absolute inset-x-0 top-0 h-[15%] overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900 to-slate-800" />
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 6.1875" preserveAspectRatio="none" aria-hidden="true">
-          {crowdPeople(100, 6.1875, 3, 19)}
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 8.4375" preserveAspectRatio="none" aria-hidden="true">
+          {crowdPeople(100, 8.4375, 4, 21, 2)}
         </svg>
         <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-black/60" />
         <div className="absolute inset-0">
-          {scatterFlags(6, 31, 100, 6.1875, [0.6, 3.7], 5.5).map(({ flag, left, top, key }) => (
+          {scatterFlags(7, 31, 100, 8.4375, [0.8, 5.1], 7.5).map(({ flag, left, top, key }) => (
             <span
               key={key}
               className="absolute -translate-x-1/2 -translate-y-1/2 text-base leading-none drop-shadow-sm"
@@ -390,7 +462,7 @@ export function GoalFrame({ outcome, ballEmoji, keeperLean }: GoalFrameProps) {
       <div
         className="pointer-events-none absolute inset-x-0"
         style={{
-          top: '11%',
+          top: '15%',
           bottom: `${100 - GRASS_TOP}%`,
           background: 'radial-gradient(60% 70% at 50% 25%, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 75%)',
         }}
