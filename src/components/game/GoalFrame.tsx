@@ -254,12 +254,13 @@ function scatterFlags(
 // field container's bottom edge so the (tall) kicker sprite never gets clipped.
 const BALL_START = { x: 54, y: 75 };
 const KICKER_POS = { x: 45, y: 78 };
-// Centered in the (now much shorter) net so the goal reads as far away rather than filling the frame.
-const KEEPER_POS = { x: 50, y: 25 };
 // Goal line: bottom edge of the posts/net. Keeping this well above the foreground turf (instead of
 // stretching the net almost to the kicker's feet) opens up a real stretch of open pitch in between,
 // which is where the penalty-box markings live, so the shot has somewhere to travel.
 const GOAL_LINE = 46;
+// Feet anchored on the goal line itself (see the bottom-anchored transform below) so the keeper
+// reads as standing in the goal mouth rather than floating centered in the open net.
+const KEEPER_POS = { x: 50, y: GOAL_LINE };
 // The close-up foreground turf strip starts here; the open pitch between GOAL_LINE and here is what
 // sells the penalty-kick distance.
 const GRASS_TOP = 84;
@@ -428,13 +429,13 @@ export function GoalFrame({ outcome, ballEmoji, keeperLean }: GoalFrameProps) {
           top: `${KEEPER_POS.y}%`,
           transform:
             flying && dive
-              ? `translate(-50%, -50%) translateX(${dive.x}px) translateY(${dive.jump ? -26 : 0}px) rotate(${dive.rotate}deg)`
-              : `translate(-50%, -50%) translateX(${leanX}px) rotate(${leanRotate}deg)`,
+              ? `translate(-50%, -100%) translateX(${dive.x}px) translateY(${dive.jump ? -26 : 0}px) rotate(${dive.rotate}deg)`
+              : `translate(-50%, -100%) translateX(${leanX}px) rotate(${leanRotate}deg)`,
           transition: 'transform 0.42s cubic-bezier(.33,.9,.4,1)',
           transitionDelay: flying ? '70ms' : '0ms',
         }}
       >
-        <GoalkeeperSprite className="h-16 w-12 drop-shadow-[0_3px_4px_rgba(0,0,0,0.45)]" />
+        <GoalkeeperSprite className="h-20 w-[60px] drop-shadow-[0_3px_4px_rgba(0,0,0,0.45)]" />
       </div>
 
       <div
